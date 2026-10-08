@@ -57,7 +57,7 @@ export async function mountClinic3D(stage,getPosition){
  g.position.set(px,0,pz);scene.add(g);return g;
  }
  const doctor=character(materials.teal,-3.4,2.4);
- const patient=character(materials.red,2.7,-1.55);let focusPatient=false;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true});
+ const patient=character(materials.red,2.7,-1.55);let focusPatient=false;let focusStart=0;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true;focusStart=performance.now()});
  // patient ring
  const ring=new T.Mesh(new T.RingGeometry(.44,.53,32),new T.MeshBasicMaterial({color:0xc8ad7c,side:T.DoubleSide}));
  ring.rotation.x=-Math.PI/2;ring.position.set(2.7,.025,-1.55);scene.add(ring);
@@ -66,7 +66,7 @@ export async function mountClinic3D(stage,getPosition){
  const ro=new ResizeObserver(size);ro.observe(stage);size();
  function frame(t){if(disposed)return;if(!stage.isConnected||document.querySelector(".walk-stage")!==stage){dispose();return}
  const p=getPosition();if(p){const tx=(p.x/100-.5)*12.2,tz=(p.y/100-.5)*8.2;doctor.position.x+=(tx-doctor.position.x)*.25;doctor.position.z+=(tz-doctor.position.z)*.25;if(Math.abs(tx-doctor.position.x)+Math.abs(tz-doctor.position.z)>.04)doctor.rotation.y=Math.atan2(tx-doctor.position.x,tz-doctor.position.z)}
- patient.position.y=Math.sin(t*.0017)*.018;ring.material.opacity=.7;if(focusPatient){camera.position.lerp(new T.Vector3(6,7,9),.09);focusTarget.lerp(new T.Vector3(2.7,1,-1.55),.09);camera.lookAt(focusTarget)}
+ patient.position.y=Math.sin(t*.0017)*.018;ring.material.opacity=.7;if(focusPatient){camera.position.lerp(new T.Vector3(6,7,9),.09);focusTarget.lerp(new T.Vector3(2.7,1,-1.55),.09);camera.lookAt(focusTarget);const u=Math.min(1,(t-focusStart)/1700);camera.zoom=1+2.7*u*u*(3-2*u);camera.updateProjectionMatrix()}
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
  function dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();scene.traverse(o=>{o.geometry?.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});renderer.dispose();renderer.domElement.remove();if(active?.dispose===dispose)active=null}
  active={dispose};stage.classList.add("three-ready");raf=requestAnimationFrame(frame);
