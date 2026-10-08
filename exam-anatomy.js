@@ -58,7 +58,7 @@ export async function mountExam3D(host,onSelect){
     // Bake the original model hierarchy transforms into a tooth-local scene.
     node.updateWorldMatrix(true,true);
     const cloned=node.clone(true);
-    cloned.applyMatrix4(node.matrixWorld);
+    cloned.matrix.copy(node.matrixWorld);cloned.matrix.decompose(cloned.position,cloned.quaternion,cloned.scale);
     tooth.add(cloned);
     tooth.position.copy(center).multiplyScalar(-scale);
     tooth.scale.setScalar(scale);
