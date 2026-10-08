@@ -1,8 +1,12 @@
 /* v0.8 stylized patient portrait: lightweight procedural Three.js face */
 let current=null;
 let requestId=0;
+let activeStage=null;
+let setEmotion=null;
+export function updatePatientFace(stage,expression){if(stage&&stage===activeStage&&setEmotion){setEmotion(expression);return true}return false}
 export async function mountPatientFace(stage,expression="neutral"){
  const request=++requestId;
+ activeStage=stage;
  if(!stage||!window.WebGLRenderingContext)return;
  let T;try{T=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js")}catch(e){return}
  if(!stage.isConnected||request!==requestId)return;
@@ -95,12 +99,14 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
    if(o.isMesh&&o.morphTargetDictionary)meshes.push(o);
    if(o.isBone&&/^(head|mixamorighead|rig_head)$/i.test(o.name))headBones.push({bone:o,rotation:o.rotation.clone()});
  });
- const emotion={
+ const expressions={
    pain:{browDownLeft:.75,browDownRight:.75,eyeSquintLeft:.5,eyeSquintRight:.5,mouthFrownLeft:.6,mouthFrownRight:.6},
    uncertain:{browOuterUpLeft:.8,browOuterUpRight:.25,browInnerUp:.3,mouthPressLeft:.25,mouthPressRight:.25},
    concerned:{browInnerUp:.7,eyeWideLeft:.25,eyeWideRight:.25,mouthFrownLeft:.35,mouthFrownRight:.35},
    tired:{eyeSquintLeft:.55,eyeSquintRight:.55,browInnerUp:.25,mouthFrownLeft:.25,mouthFrownRight:.25}
- }[expression]||{};
+ };
+ let emotion=expressions[expression]||{};
+ setEmotion=(next)=>{expression=next;emotion=expressions[next]||{}};
  let disposed=false,raf=0;const start=performance.now(),reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches||false;
  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
  const ro=new ResizeObserver(resize);ro.observe(stage);resize();
@@ -123,7 +129,7 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  function dispose(){
    if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();
    avatar.traverse(o=>{o.geometry?.dispose();if(o.material){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m.dispose())}});
-   renderer.dispose();renderer.domElement.remove();stage.classList.remove("patient-three-ready");if(current===dispose)current=null;
+   renderer.dispose();renderer.domElement.remove();stage.classList.remove("patient-three-ready");if(current===dispose)current=null;if(activeStage===stage){activeStage=null;setEmotion=null}
  }
  current=dispose;stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
 }
