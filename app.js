@@ -15,7 +15,7 @@ const K="endoV02";let s=JSON.parse(localStorage.getItem(K)||'null')||{page:"land
    <div class="cinema-footnote"><span>01 / PATIENT HISTORY</span><i></i><span>02 / CLINICAL EXAM</span><i></i><span>03 / DIAGNOSIS</span></div>
   </section>
   <div class="cinema-visual" aria-label="Stylized cinematic dental operatory preview">
-   <div class="cinema-scene">
+   <img src="./endo-aaa-operatory.webp" alt="" hidden onload="this.parentElement.classList.add('aaa-ready')" onerror="this.remove()"><div class="cinema-scene">
     <div class="cinema-back-wall"></div>
     <div class="cinema-side-wall"></div>
     <div class="cinema-floor"></div>
