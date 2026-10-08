@@ -89,9 +89,9 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  const avatar=gltf.scene;scene.add(avatar);avatar.updateMatrixWorld(true);
  const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
  // Portrait crop: focus on upper torso, not full-body bounds.
- const focusY=box.max.y-size.y*.17;
- const portraitHeight=Math.max(size.y*.42,size.x*.95);
- const dist=portraitHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.12;
+ const focusY=box.max.y-size.y*.13;
+ const portraitHeight=Math.max(size.y*.28,size.x*.4);
+ const dist=portraitHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*.95;
  camera.position.set(center.x,focusY,center.z+dist);
  camera.lookAt(center.x,focusY,center.z);
  const meshes=[],headBones=[];
