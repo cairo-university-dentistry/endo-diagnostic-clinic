@@ -29,7 +29,7 @@ const K="endoV02";let s=JSON.parse(localStorage.getItem(K)||'null')||{page:"land
     <div class="cinema-instrument"></div>
    </div>
    <div class="cinema-visual-top"><span class="cinema-rec">● LIVE SIMULATION</span><span>OPERATORY / 01</span></div>
-   <div class="cinema-visual-bottom"><div><small>YOUR FIRST PATIENT</small><strong>The case begins here.</strong></div><span class="cinema-cross">✳</span></div>
+   <div class="cinema-visual-bottom"><div><small>YOUR FIRST PATIENT</small><strong>The case begins here.</strong></div></div>
   </div>
  </div>
  <div class="cinema-bottom"><span>DESIGNED FOR CLINICAL THINKING</span><span>EXPLORE · EXAMINE · DECIDE</span><span>SCROLL TO BEGIN <b>↓</b></span></div>
