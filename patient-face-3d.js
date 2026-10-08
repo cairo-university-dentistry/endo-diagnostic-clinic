@@ -87,6 +87,13 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  const key=new T.DirectionalLight(0xffe5cf,2.3);key.position.set(-3,5,5);scene.add(key);
  const rim=new T.DirectionalLight(0xa5c7d8,1.3);rim.position.set(3,2,-3);scene.add(rim);
  const avatar=gltf.scene;scene.add(avatar);avatar.updateMatrixWorld(true);
+ // Hide disconnected arms in the temporary half-body model.
+ const initial=new T.Box3().setFromObject(avatar),origin=initial.getCenter(new T.Vector3()),span=initial.getSize(new T.Vector3());
+ avatar.traverse(part=>{
+  if(!part.isMesh)return;
+  const mid=new T.Box3().setFromObject(part).getCenter(new T.Vector3());
+  if(/hand|finger|wrist|arm/i.test(part.name)||Math.abs(mid.x-origin.x)>span.x*.29)part.visible=false;
+ });
  const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
  // Portrait crop: focus on upper torso, not full-body bounds.
  const focusY=box.max.y-size.y*.13;
