@@ -34,7 +34,7 @@ function setupWalk(){
  if(clear(x,ny))y=ny;
  draw();
  }
- if(!clear(x,y)){x=37;y=82}draw();talk.onclick=()=>{if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1100)};
+ if(!clear(x,y)){x=37;y=82}draw();talk.onclick=()=>{if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1900)};
  import("./clinic-3d.js?v=060").then(m=>m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}))).catch(e=>console.warn("3D fallback",e));
  document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{const d=b.dataset.dir;move(d==="left"?-1:d==="right"?1:0,d==="up"?-1:d==="down"?1:0)});
  const pad=document.querySelector("#walk-joystick"),stick=document.querySelector("#walk-stick");
