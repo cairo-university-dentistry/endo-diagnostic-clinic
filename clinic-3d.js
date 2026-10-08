@@ -63,7 +63,19 @@ export async function mountClinic3D(stage,getPosition){
   import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js").then(({GLTFLoader})=>{
    new GLTFLoader().load(window.ENDO_PATIENT_MODEL_URL,gltf=>{
     if(disposed||!stage.isConnected)return;
-    const model=gltf.scene, bounds=new T.Box3().setFromObject(model),dim=bounds.getSize(new T.Vector3());
+    const model=gltf.scene;
+    // This half-body asset contains detached hands. Hide those pieces until
+    // the new full-body cinematic avatar is ready.
+    model.updateMatrixWorld(true);
+    const allBounds=new T.Box3().setFromObject(model);
+    const allCenter=allBounds.getCenter(new T.Vector3());
+    const allSize=allBounds.getSize(new T.Vector3());
+    model.traverse(part=>{
+     if(!part.isMesh)return;
+     const bounds=new T.Box3().setFromObject(part),mid=bounds.getCenter(new T.Vector3());
+     if(/hand|finger|wrist|arm/i.test(part.name)||Math.abs(mid.x-allCenter.x)>allSize.x*.29)part.visible=false;
+    });
+    const bounds=new T.Box3().setFromObject(model),dim=bounds.getSize(new T.Vector3());
     if(!dim.y)return;
     const scale=1.7/dim.y;model.scale.setScalar(scale);
     const scaled=new T.Box3().setFromObject(model);
