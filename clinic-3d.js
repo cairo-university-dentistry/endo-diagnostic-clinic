@@ -57,7 +57,7 @@ export async function mountClinic3D(stage,getPosition){
  g.position.set(px,0,pz);scene.add(g);return g;
  }
  const doctor=character(materials.teal,-3.4,2.4);
- const patient=character(materials.red,2.7,-1.55);let focusPatient=false;const focusTarget=new T.Vector3();stage.addEventListener("click",e=>{if(e.target.closest("#walk-talk"))focusPatient=true});
+ const patient=character(materials.red,2.7,-1.55);let focusPatient=false;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true});
  // patient ring
  const ring=new T.Mesh(new T.RingGeometry(.44,.53,32),new T.MeshBasicMaterial({color:0xc8ad7c,side:T.DoubleSide}));
  ring.rotation.x=-Math.PI/2;ring.position.set(2.7,.025,-1.55);scene.add(ring);
