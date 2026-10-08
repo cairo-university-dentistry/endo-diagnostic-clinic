@@ -47,6 +47,56 @@ export async function mountClinic3D(stage,getPosition){
  // instrument trolley
  box(1.3,.12,.75,.05,1.0,1.7,materials.metal);
  for(const x of [-.5,.55])for(const z of [1.4,2])box(.08,.95,.08,x,.48,z,materials.metal);
+ // v0.9 clinic environment pass — richer geometry, still mobile friendly.
+ const porcelain=0xd8ded9,accent=0x8dbbb1,brass=0xbca57c,screen=0x24363d;
+ // Floor tiles and subtle grout: thin strips avoid heavy texture downloads.
+ for(let x=-6;x<=6;x+=1.25)box(.012,.008,9,x,-.048,0,0x445154);
+ for(let z=-4;z<=4;z+=1.25)box(13,.008,.012,0,-.048,z,0x445154);
+ // Baseboards and wall cladding.
+ box(12.8,.16,.06,0,.09,-4.31,0x9ca7a4);
+ box(.06,.16,8.8,-6.31,.09,0,0x9ca7a4);
+ for(const x of [-4.8,-2.8,-.8,1.2,3.2,5.2])box(.018,1.6,.035,x,1.12,-4.31,0x687476);
+ // Ceiling-like soft luminous wall panels.
+ for(const x of [-3.7,.1,3.9]){
+  box(2.25,.11,.09,x,1.93,-4.27,0xdcece5);
+  box(2.4,.035,.12,x,1.83,-4.25,brass);
+ }
+ // Reception front fluting and counter surface.
+ box(3.6,.11,1.13,-4.1,1.0,-2.5,porcelain);
+ for(let x=-5.6;x<=-2.6;x+=.21)box(.045,.7,.035,x,.52,-1.975,0x887965);
+ // Waiting zone: plant, pot and slender trunk.
+ cylinder(.31,.38,-5.65,.18,3.2,porcelain);
+ cylinder(.07,.72,-5.65,.7,3.2,0x69594b);
+ for(let i=0;i<6;i++){const a=i*Math.PI/3;const leaf=new T.Mesh(new T.SphereGeometry(.28,8,6),mat(0x477d67));leaf.position.set(-5.65+Math.cos(a)*.23,1.08,3.2+Math.sin(a)*.23);leaf.scale.set(.65,1.3,.65);scene.add(leaf)}
+ // Clinical cabinets with inset doors and countertop.
+ box(1.5,.13,3.1,5.42,1.25,-2.1,porcelain);
+ for(const z of [-3.18,-2.18,-1.18]){
+  box(.045,.84,.85,4.64,.62,z,0xe1e4dd);
+  box(.055,.055,.42,4.59,.78,z,brass);
+ }
+ // Examination monitor on swivel mount.
+ cylinder(.07,.7,3.95,1.6,-3.45,materials.metal);
+ const monitor=box(1.15,.8,.08,3.95,2.03,-3.42,screen);
+ box(.94,.59,.018,3.95,2.03,-3.36,0x75a5a0);
+ box(.65,.035,.025,3.95,2.08,-3.34,0xd4e9df);
+ // Dental unit: chair upholstery and armrests.
+ box(1.28,.07,1.8,2.1,.88,.9,accent);
+ for(const x of [1.4,2.8]){
+  box(.14,.12,1.15,x,.94,.8,porcelain);
+  cylinder(.07,.62,x,.56,.45,materials.metal);
+ }
+ // Tray instruments: subtle organized metal instruments.
+ for(let i=0;i<5;i++){
+  const inst=box(.035,.025,.44,-.48+i*.2,1.1,1.68,materials.metal);
+  inst.rotation.y=.1;
+ }
+ // Overhead operatory lamp housing with a luminous inset.
+ const lamp=box(.85,.14,.46,2.1,2.13,-2.7,porcelain);
+ box(.62,.025,.32,2.1,2.04,-2.7,0xf3dca9);
+ // A compact wall clock and hygiene dispenser.
+ cylinder(.27,.045,-2.05,1.53,-4.28,porcelain);
+ box(.25,.4,.14,-1.65,.92,-4.18,porcelain);
+ box(.18,.055,.14,-1.65,.69,-4.1,materials.metal);
  // character rig
  function character(shirt,px,pz){
  const g=new T.Group();
