@@ -33,8 +33,8 @@ export async function mountExam3D(host,onSelect){
    crown.scale.set(...dims);crown.position.set(x,y+(upper?-.33:.33),z);
    crown.rotation.y=-a+Math.PI/2;
    const quadrant=upper?(i<8?1:2):(i<8?4:3);
-   const position=i<8?i+1:16-i;
-   // Screen-left / screen-right numbering is an illustrative arrangement.
+   const position=i<8?8-i:i-7;
+   // FDI positions run from third molar (8) at the distal end to central incisor (1).
    const fdi=quadrant*10+position;
    crown.userData.fdi=fdi;crown.userData.arch=archName;
    arch.add(crown);teeth.push(crown);
