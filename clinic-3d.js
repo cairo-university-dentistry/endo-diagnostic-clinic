@@ -108,33 +108,48 @@ export async function mountClinic3D(stage,getPosition){
  }
  const doctor=character(materials.teal,-3.4,2.4);
  const patient=character(materials.red,2.7,-1.55);
- // Shared avatar asset: same patient identity in the clinic and in dialogue.
- if(window.ENDO_PATIENT_MODEL_URL){
-  import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js").then(({GLTFLoader})=>{
-   new GLTFLoader().load(window.ENDO_PATIENT_MODEL_URL,gltf=>{
-    if(disposed||!stage.isConnected)return;
-    const model=gltf.scene;
-    // This half-body asset contains detached hands. Hide those pieces until
-    // the new full-body cinematic avatar is ready.
-    model.updateMatrixWorld(true);
-    const allBounds=new T.Box3().setFromObject(model);
-    const allCenter=allBounds.getCenter(new T.Vector3());
-    const allSize=allBounds.getSize(new T.Vector3());
-    model.traverse(part=>{
-     if(!part.isMesh)return;
-     const bounds=new T.Box3().setFromObject(part),mid=bounds.getCenter(new T.Vector3());
-     if(/hand|finger|wrist|arm/i.test(part.name)||Math.abs(mid.x-allCenter.x)>allSize.x*.29)part.visible=false;
-    });
-    const bounds=new T.Box3().setFromObject(model),dim=bounds.getSize(new T.Vector3());
-    if(!dim.y)return;
-    const scale=1.7/dim.y;model.scale.setScalar(scale);
-    const scaled=new T.Box3().setFromObject(model);
-    const center=scaled.getCenter(new T.Vector3());
-    model.position.set(-center.x,-scaled.min.y,-center.z);
-    patient.clear();patient.add(model);
-   },undefined,err=>console.warn("Clinic avatar unavailable",err));
-  }).catch(err=>console.warn("Clinic avatar loader unavailable",err));
- }let focusPatient=false;let focusStart=0;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true;focusStart=performance.now()});
+ // Temporary complete-body patient. The previous half-body GLB had detached hands.
+ // Keep this reliable stand-in until a properly rigged cinematic asset is ready.
+ for(const dx of [-.36,.36]){
+  const arm=new T.Mesh(new T.CapsuleGeometry(.105,.48,5,9),mat(materials.red));
+  arm.position.set(dx,1.01,0);arm.rotation.z=dx>0?-.16:.16;patient.add(arm);
+  const hand=new T.Mesh(new T.SphereGeometry(.105,10,8),mat(materials.skin));
+  hand.position.set(dx*1.19,.65,0);patient.add(hand);
+ }
+ // Dental operatory: rounded sculpted chair shell instead of only rectangular blocks.
+ const upholstery=new T.MeshStandardMaterial({color:0x83bcb2,roughness:.72});
+ function cushion(w,h,d,x,y,z,rot=0){
+  const m=new T.Mesh(new T.BoxGeometry(w,h,d,1,1,1),upholstery);
+  m.position.set(x,y,z);m.rotation.x=rot;scene.add(m);
+  const edge=new T.Mesh(new T.BoxGeometry(w*.92,.055,d*.9),mat(0xa5d0c5));
+  edge.position.set(x,y+h*.5+.014,z);edge.rotation.x=rot;scene.add(edge);
+ }
+ cushion(1.12,.16,1.5,2.1,.97,.75);
+ cushion(1.1,.14,1.52,2.1,1.24,-.58,-.43);
+ cushion(.69,.14,.39,2.1,1.66,-1.41,-.3);
+ // Foot-operated pedestal, joint and tubing holder.
+ cylinder(.24,.62,2.1,.34,.7,0x8b999a);
+ cylinder(.32,.12,2.1,.68,.7,0xc5cdca);
+ cylinder(.12,.2,3.24,.86,-.18,materials.metal);
+ box(.5,.14,.3,3.24,1.03,-.18,porcelain);
+ for(let i=0;i<3;i++){
+  const tool=new T.Mesh(new T.CylinderGeometry(.028,.037,.42,8),mat(0x9eacaf));
+  tool.position.set(3.04+i*.2,1.25,-.2);tool.rotation.z=.24;scene.add(tool);
+ }
+ // Assistant-side spittoon and compact water cup.
+ cylinder(.31,.12,3.4,1.02,.9,porcelain);
+ cylinder(.2,.08,3.4,1.11,.9,0x8baead);
+ cylinder(.075,.18,3.7,1.1,.9,0xd5e7e2);
+ // Ceiling task light with segmented arm, not just a hovering disc.
+ const hinge=new T.Mesh(new T.SphereGeometry(.12,10,8),mat(materials.metal));
+ hinge.position.set(2.1,2.43,-2.7);scene.add(hinge);
+ for(const x of [1.77,2.43]){
+  const grip=new T.Mesh(new T.CapsuleGeometry(.045,.2,4,7),mat(0x687c7c));
+  grip.position.set(x,2.08,-2.7);scene.add(grip);
+ }
+ // A restrained illuminated clinical strip under the cabinetry.
+ box(.1,.035,2.5,4.66,.17,-2.1,0xb5d6cb);
+ let focusPatient=false;let focusStart=0;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true;focusStart=performance.now()});
  // patient ring
  const ring=new T.Mesh(new T.RingGeometry(.44,.53,32),new T.MeshBasicMaterial({color:0xc8ad7c,side:T.DoubleSide}));
  ring.rotation.x=-Math.PI/2;ring.position.set(2.7,.025,-1.55);scene.add(ring);
