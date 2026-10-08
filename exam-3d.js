@@ -8,7 +8,7 @@ export async function mountExam3D(host,onSelect){
  if(disposeActive)disposeActive();
  const scene=new T.Scene();scene.background=new T.Color(0x101d21);
  const camera=new T.PerspectiveCamera(38,1,.1,60);
- camera.position.set(0,5.3,12.9);camera.lookAt(0,0,0);
+ camera.position.set(0,3.8,-12.9);camera.lookAt(0,0,0);
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:"low-power"});
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.outputColorSpace=T.SRGBColorSpace;
  renderer.domElement.style.cssText="width:100%;height:100%;display:block;touch-action:none";host.appendChild(renderer.domElement);
@@ -48,11 +48,11 @@ export async function mountExam3D(host,onSelect){
  const controls=host.parentElement?.querySelectorAll("[data-arch]")||[];
  controls.forEach(b=>b.addEventListener("click",()=>{controls.forEach(x=>x.classList.toggle("active",x===b));view(b.dataset.arch)}));
  renderer.domElement.addEventListener("pointerdown",e=>{drag=false;px=e.clientX;py=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
- renderer.domElement.addEventListener("pointermove",e=>{if(!renderer.domElement.hasPointerCapture(e.pointerId))return;const dx=e.clientX-px,dy=e.clientY-py;if(Math.abs(dx)+Math.abs(dy)>3)drag=true;if(drag){root.rotation.y=Math.max(-.9,Math.min(.9,root.rotation.y+dx*.006));root.rotation.x=Math.max(-.25,Math.min(.45,root.rotation.x+dy*.004));px=e.clientX;py=e.clientY}});
+ renderer.domElement.addEventListener("pointermove",e=>{if(!renderer.domElement.hasPointerCapture(e.pointerId))return;const dx=e.clientX-px,dy=e.clientY-py;if(Math.abs(dx)+Math.abs(dy)>3)drag=true;if(drag){root.rotation.y+=dx*.008;root.rotation.x=Math.max(-1.2,Math.min(1.2,root.rotation.x+dy*.005));px=e.clientX;py=e.clientY}});
  renderer.domElement.addEventListener("pointerup",e=>{if(!drag)tap(e)});
- renderer.domElement.addEventListener("wheel",e=>{e.preventDefault();camera.position.z=Math.max(8,Math.min(18,camera.position.z+e.deltaY*.012))},{passive:false});
+ renderer.domElement.addEventListener("wheel",e=>{e.preventDefault();camera.position.z=-Math.max(8,Math.min(18,Math.abs(camera.position.z)+e.deltaY*.012))},{passive:false});
  let pinch=null;
- renderer.domElement.addEventListener("touchmove",e=>{if(e.touches.length!==2){pinch=null;return}e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch!==null)camera.position.z=Math.max(8,Math.min(18,camera.position.z+(pinch-d)*.018));pinch=d},{passive:false});
+ renderer.domElement.addEventListener("touchmove",e=>{if(e.touches.length!==2){pinch=null;return}e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch!==null)camera.position.z=-Math.max(8,Math.min(18,Math.abs(camera.position.z)+(pinch-d)*.018));pinch=d},{passive:false});
  renderer.domElement.addEventListener("touchend",()=>{pinch=null});
  function resize(){if(dead)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
  const ro=new ResizeObserver(resize);ro.observe(host);resize();
