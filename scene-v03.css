@@ -6,3 +6,27 @@
 
 /* v0.3.4: mobile Safari joystick fallback */
 @media(max-width:800px){.walk-joystick{display:block!important}.walk-controls{display:none!important}.walk-action{bottom:26px;left:auto;right:14px;transform:none}.walk-status{bottom:160px}}
+
+/* v0.4 — richer isometric environment and character silhouettes */
+.walk-stage{background:radial-gradient(ellipse at 65% 35%,#394a4b,#111719 70%);box-shadow:inset 0 0 90px #0008}
+.walk-main{background:repeating-linear-gradient(0deg,transparent 0 44px,#ffffff08 45px 46px),repeating-linear-gradient(90deg,#293337 0 44px,#ffffff08 45px 46px);border:5px solid #6d7776;box-shadow:0 24px 32px #000b,inset 0 0 50px #0008}
+.walk-op{background:linear-gradient(140deg,#445154,#263134);border-color:#87908b;box-shadow:inset 0 0 40px #0007}
+.walk-reception{background:linear-gradient(145deg,#45403b,#2b3030);border-color:#7b756c}
+.walk-chair{background:linear-gradient(125deg,#f5f1e5,#c7c7be);border:5px solid #aeb5b0;box-shadow:12px 12px 0 #151b1e,16px 19px 18px #0009;transform:rotate(-12deg)}
+.walk-chair:before{content:"";position:absolute;left:18%;top:-27px;width:65%;height:26px;background:#e8e4d9;border:3px solid #9fa7a3;border-radius:15px 15px 4px 4px}
+.walk-chair:after{content:"";position:absolute;left:38%;top:52px;width:24%;height:55px;background:linear-gradient(#a8b6b4,#596669);border-radius:5px}
+.walk-desk{height:43px;background:linear-gradient(#c4b89e,#8b7d67);border:3px solid #cbbda1;box-shadow:7px 9px 0 #171c1f,10px 13px 16px #0008}
+.walk-desk-screen{position:absolute;left:18%;top:10%;width:50px;height:30px;background:#142629;border:5px solid #6f7775;border-radius:5px;box-shadow:0 0 20px #7fc9b04d}
+.walk-seat{position:absolute;width:48px;height:35px;background:#8c9b95;border:4px solid #4a5d5b;border-radius:12px 12px 6px 6px;box-shadow:6px 8px 0 #1b2324}
+.waiting-a{left:13%;top:57%}.waiting-b{left:24%;top:57%}
+.walk-cabinet{position:absolute;left:86%;top:19%;width:28px;height:108px;background:repeating-linear-gradient(0deg,#b5bbb6 0 29px,#606d6b 30px 34px);border:3px solid #e0dfd5;box-shadow:7px 7px 0 #1c2325}
+.walk-tray{position:absolute;left:46%;top:63%;width:52px;height:37px;border-radius:8px;background:linear-gradient(145deg,#e3e6df,#687a7b);border:4px solid #bbc9c7;box-shadow:8px 8px 0 #192023}
+.walk-lamp{position:absolute;left:59%;top:19%;width:26px;height:26px;border-radius:50%;background:#f9e9c4;box-shadow:0 0 0 8px #c3c5ad,0 0 36px 20px #f8eac344}
+.walk-player,.walk-patient{width:34px;height:34px;border:0;box-shadow:0 6px 14px #000b;isolation:isolate}
+.walk-player{background:linear-gradient(140deg,#e7f1eb,#6a9d95);border:4px solid #d8e3d9}
+.walk-patient{background:linear-gradient(140deg,#c36d62,#722f38);border:4px solid #d9a897}
+.walk-player:before,.walk-patient:before{content:"";position:absolute;width:17px;height:17px;left:50%;top:-13px;transform:translateX(-50%);border-radius:50%;background:#b68c73;box-shadow:0 -3px 0 #292c2d}
+.walk-player:after,.walk-patient:after{content:"";position:absolute;left:10px;bottom:-11px;width:7px;height:12px;background:#2d3637;border-radius:3px;box-shadow:11px 0 0 #2d3637}
+.walk-patient:after{background:#49403d;box-shadow:11px 0 0 #49403d}
+.walk-floor-glow{position:absolute;left:55%;top:30%;width:30%;height:45%;border-radius:50%;background:#f5e5bd16;filter:blur(24px);pointer-events:none}
+@media(max-width:700px){.walk-seat{width:36px;height:28px}.walk-cabinet{height:75px}.walk-chair:after{height:35px}.walk-hint{font-size:.7rem;max-width:80%;padding:10px}}
