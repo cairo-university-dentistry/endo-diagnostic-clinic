@@ -48,3 +48,9 @@
 @media(max-width:1000px){.cinema-layout{grid-template-columns:1fr;padding:50px 5vw 20px;gap:35px}.cinema-title{font-size:clamp(4rem,11vw,7rem)}.cinema-visual{height:clamp(420px,65vw,680px)}.cinema-overline{margin-top:30px}.cinema-footnote{margin-top:36px}.cinema-copy{padding-bottom:0}}
 @media(max-width:600px){.cinema-layout{padding:34px 20px 20px;gap:25px}.cinema-kicker{font-size:8px;gap:7px;letter-spacing:.09em}.cinema-kicker-line{width:12px}.cinema-overline{font-size:10px;margin-top:29px}.cinema-title{font-size:clamp(3.6rem,13.5vw,5.4rem);margin:15px 0 22px;line-height:.98}.cinema-desc{font-size:14px;line-height:1.75}.cinema-actions{margin-top:27px;gap:12px}.cinema-start{width:100%;justify-content:flex-start}.cinema-explore{margin:0 auto}.cinema-footnote{font-size:7px;gap:7px;letter-spacing:0;justify-content:center;margin-top:26px}.cinema-visual{height:420px}.cinema-visual-top,.cinema-visual-bottom{left:16px;right:16px}.cinema-visual-top{font-size:8px}.cinema-bottom{padding:16px 20px 25px;font-size:8px}.cinema-bottom span:nth-child(2){display:none}}
 @media(prefers-reduced-motion:no-preference){.cinema-visual{animation:cinema-reveal .8s ease both}.cinema-copy{animation:cinema-reveal .7s ease both}@keyframes cinema-reveal{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}}
+
+/* AAA operatory render — loads automatically once the supplied asset is uploaded */
+.cinema-visual{background:#101c21 url("./endo-aaa-operatory.webp") center center / cover no-repeat}
+.cinema-scene{display:none}
+.cinema-visual:after{background:linear-gradient(180deg,#07101599,transparent 22%,transparent 70%,#071015d9),linear-gradient(90deg,#08101433,transparent 40%)}
+@media(max-width:600px){.cinema-visual{background-position:51% center}}
