@@ -1,9 +1,11 @@
 /* v0.8 stylized patient portrait: lightweight procedural Three.js face */
 let current=null;
+let requestId=0;
 export async function mountPatientFace(stage,expression="neutral"){
+ const request=++requestId;
  if(!stage||!window.WebGLRenderingContext)return;
  let T;try{T=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js")}catch(e){return}
- if(!stage.isConnected)return;
+ if(!stage.isConnected||request!==requestId)return;
  // Prefer a production GLB avatar with facial blendshapes when a licensed asset is configured.
  // Until then retain the procedural prototype rather than claim it is cinematic.
  const modelUrl=window.ENDO_PATIENT_MODEL_URL;
@@ -12,11 +14,12 @@ export async function mountPatientFace(stage,expression="neutral"){
      const {GLTFLoader}=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js");
      const loader=new GLTFLoader();
      const gltf=await loader.loadAsync(modelUrl);
-     if(!stage.isConnected)return;
+     if(!stage.isConnected||request!==requestId)return;
      return mountRiggedPortrait(stage,T,gltf,expression);
    }catch(err){console.warn("Avatar unavailable; showing prototype",err)}
  }
 
+ if(request!==requestId||!stage.isConnected)return;
  if(current)current();
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(30,1,.1,30);
  camera.position.set(0,.08,7.8);camera.lookAt(0,.05,0);
@@ -70,6 +73,7 @@ export async function mountPatientFace(stage,expression="neutral"){
 }
 
 async function mountRiggedPortrait(stage,T,gltf,expression){
+ if(current)current();
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.1,100);
  const renderer=new T.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"});
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
@@ -80,9 +84,11 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  const rim=new T.DirectionalLight(0xa5c7d8,1.3);rim.position.set(3,2,-3);scene.add(rim);
  const avatar=gltf.scene;scene.add(avatar);avatar.updateMatrixWorld(true);
  const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
- // Frame the head/upper body for portrait composition regardless of avatar scale.
- const focusY=box.max.y-size.y*.18;
- camera.position.set(center.x,focusY,box.max.z+Math.max(size.y*.65,size.x*2.1));
+ // Portrait crop: focus on upper torso, not full-body bounds.
+ const focusY=box.max.y-size.y*.17;
+ const portraitHeight=Math.max(size.y*.42,size.x*.95);
+ const dist=portraitHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.12;
+ camera.position.set(center.x,focusY,center.z+dist);
  camera.lookAt(center.x,focusY,center.z);
  const meshes=[],headBones=[];
  avatar.traverse(o=>{
@@ -117,7 +123,7 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  function dispose(){
    if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();
    avatar.traverse(o=>{o.geometry?.dispose();if(o.material){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m.dispose())}});
-   renderer.dispose();renderer.domElement.remove();stage.classList.remove("patient-three-ready");
+   renderer.dispose();renderer.domElement.remove();stage.classList.remove("patient-three-ready");if(current===dispose)current=null;
  }
- stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
+ current=dispose;stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
 }
