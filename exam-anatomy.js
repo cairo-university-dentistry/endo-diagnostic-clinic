@@ -60,8 +60,8 @@ export async function mountExam3D(host,onSelect){
     const cloned=node.clone(true);
     cloned.applyMatrix4(node.matrixWorld);
     tooth.add(cloned);
-    tooth.position.sub(center).multiplyScalar(scale);
-    cloned.scale.multiplyScalar(scale);
+    tooth.position.copy(center).multiplyScalar(-scale);
+    tooth.scale.setScalar(scale);
     const number=i<half?half-i:i-half+1;
     const quadrant=g.arch==="upper"?(i<half?1:2):(i<half?4:3);
     tooth.userData={fdi:quadrant*10+number,arch:g.arch};
