@@ -57,7 +57,22 @@ export async function mountClinic3D(stage,getPosition){
  g.position.set(px,0,pz);scene.add(g);return g;
  }
  const doctor=character(materials.teal,-3.4,2.4);
- const patient=character(materials.red,2.7,-1.55);let focusPatient=false;let focusStart=0;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true;focusStart=performance.now()});
+ const patient=character(materials.red,2.7,-1.55);
+ // Shared avatar asset: same patient identity in the clinic and in dialogue.
+ if(window.ENDO_PATIENT_MODEL_URL){
+  import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js").then(({GLTFLoader})=>{
+   new GLTFLoader().load(window.ENDO_PATIENT_MODEL_URL,gltf=>{
+    if(disposed||!stage.isConnected)return;
+    const model=gltf.scene, bounds=new T.Box3().setFromObject(model),dim=bounds.getSize(new T.Vector3());
+    if(!dim.y)return;
+    const scale=1.7/dim.y;model.scale.setScalar(scale);
+    const scaled=new T.Box3().setFromObject(model);
+    const center=scaled.getCenter(new T.Vector3());
+    model.position.set(-center.x,-scaled.min.y,-center.z);
+    patient.clear();patient.add(model);
+   },undefined,err=>console.warn("Clinic avatar unavailable",err));
+  }).catch(err=>console.warn("Clinic avatar loader unavailable",err));
+ }let focusPatient=false;let focusStart=0;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true;focusStart=performance.now()});
  // patient ring
  const ring=new T.Mesh(new T.RingGeometry(.44,.53,32),new T.MeshBasicMaterial({color:0xc8ad7c,side:T.DoubleSide}));
  ring.rotation.x=-Math.PI/2;ring.position.set(2.7,.025,-1.55);scene.add(ring);
