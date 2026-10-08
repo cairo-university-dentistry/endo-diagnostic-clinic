@@ -29,7 +29,8 @@ export async function mountExam3D(host,onSelect){
    const dist=Math.min(i,15-i);
    const type=dist<3?"molar":dist<5?"premolar":dist===5?"canine":"incisor";
    const dims=type==="molar"?[.42,.43,.48]:type==="premolar"?[.34,.4,.37]:type==="canine"?[.30,.48,.34]:[.32,.37,.27];
-   const crown=new T.Mesh(new T.SphereGeometry(1,14,10),enamel);
+   const shape=type==="incisor"?new T.BoxGeometry(1.45,1.65,1.2):type==="canine"?new T.ConeGeometry(1,2.1,12):type==="premolar"?new T.CylinderGeometry(.8,1,1.7,10):new T.CylinderGeometry(1,1.12,1.7,12);
+   const crown=new T.Mesh(shape,enamel);
    crown.scale.set(...dims);crown.position.set(x,y+(upper?-.33:.33),z);
    crown.rotation.y=-a+Math.PI/2;
    const quadrant=upper?(i<8?1:2):(i<8?4:3);
