@@ -14,7 +14,7 @@ export async function mountExam3D(host,onSelect){
  renderer.domElement.style.cssText="width:100%;height:100%;display:block;touch-action:none";host.appendChild(renderer.domElement);
  scene.add(new T.HemisphereLight(0xffffff,0x43515b,2.7));
  const light=new T.DirectionalLight(0xffffff,2.4);light.position.set(-4,7,-5);scene.add(light);
- const root=new T.Group();scene.add(root);
+ const root=new T.Group();root.rotation.y=Math.PI;scene.add(root);
  const arches={upper:new T.Group(),lower:new T.Group()};root.add(arches.upper,arches.lower);
  const status=document.createElement("div");status.style.cssText="position:absolute;top:92px;left:15px;right:15px;text-align:center;color:#dfcba4;font:12px sans-serif;pointer-events:none";status.textContent="Loading anatomical dentition…";host.parentElement.appendChild(status);
  let teeth=[],selected=null,drag=false,px=0,py=0,dead=false,raf=0;
