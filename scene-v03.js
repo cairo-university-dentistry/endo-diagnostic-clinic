@@ -10,12 +10,32 @@ window.clinic=function(){
 function setupWalk(){
  const player=document.querySelector("#walk-player"),talk=document.querySelector("#walk-talk"),status=document.querySelector("#walk-status");
  if(!player)return;
- let x=Number.isFinite(s.walkX)?s.walkX:29,y=Number.isFinite(s.walkY)?s.walkY:72;
+ let x=Number.isFinite(s.walkX)?s.walkX:37,y=Number.isFinite(s.walkY)?s.walkY:82;
  const near=()=>Math.hypot(x-71,y-30)<16;
  function draw(){player.style.left=x+"%";player.style.top=y+"%";const ok=near();talk.hidden=!ok;status.textContent=ok?"Patient in range · INTERACT":"Approach the red marker";document.querySelector("#walk-patient")?.classList.toggle("walk-near",ok);s.walkX=x;s.walkY=y;save()}
- function move(dx,dy){if(s.page!=="clinic")return;x=Math.max(8,Math.min(92,x+dx*3));y=Math.max(9,Math.min(90,y+dy*3));draw()}
- draw();talk.onclick=()=>go("history");
- import("./clinic-3d.js?v=050").then(m=>m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}))).catch(e=>console.warn("3D fallback",e));
+ // Collision coordinates match the Three.js world: X = (x/100-.5)*12.2, Z = (y/100-.5)*8.2.
+ const obstacles=[
+ [-4.1,-2.5,3.4,1.0],[-4.9,1.65,1.1,1.0],[-3.45,1.65,1.1,1.0],
+ [5.45,-2.1,1.2,2.7],[2.1,.8,1.65,4.3],[.05,1.7,1.3,.75],
+ [.1,-2.7,.3,.35],[-1.1,-1.7,.14,5.0]
+ ];
+ const radius=.30;
+ function clear(px,py){
+ const wx=(px/100-.5)*12.2,wz=(py/100-.5)*8.2;
+ if(wx< -6.1+radius||wx>6.1-radius||wz< -4.1+radius||wz>4.1-radius)return false;
+ return !obstacles.some(([ox,oz,w,d])=>Math.abs(wx-ox)<w/2+radius&&Math.abs(wz-oz)<d/2+radius);
+ }
+ // Resolve axes independently so the doctor slides along furniture rather than sticking.
+ function move(dx,dy){
+ if(s.page!=="clinic")return;
+ const length=Math.hypot(dx,dy);if(length>1){dx/=length;dy/=length}
+ const nx=Math.max(0,Math.min(100,x+dx*3)),ny=Math.max(0,Math.min(100,y+dy*3));
+ if(clear(nx,y))x=nx;
+ if(clear(x,ny))y=ny;
+ draw();
+ }
+ if(!clear(x,y)){x=37;y=82}draw();talk.onclick=()=>go("history");
+ import("./clinic-3d.js?v=051").then(m=>m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}))).catch(e=>console.warn("3D fallback",e));
  document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{const d=b.dataset.dir;move(d==="left"?-1:d==="right"?1:0,d==="up"?-1:d==="down"?1:0)});
  const pad=document.querySelector("#walk-joystick"),stick=document.querySelector("#walk-stick");
  if(pad&&stick){
