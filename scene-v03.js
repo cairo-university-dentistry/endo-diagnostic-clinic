@@ -34,7 +34,7 @@ function setupWalk(){
  if(clear(x,ny))y=ny;
  draw();
  }
- if(!clear(x,y)){x=37;y=82}draw();talk.onclick=()=>{s.patientIntro=true;save();go("history")};
+ if(!clear(x,y)){x=37;y=82}draw();talk.onclick=()=>{if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1100)};
  import("./clinic-3d.js?v=060").then(m=>m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}))).catch(e=>console.warn("3D fallback",e));
  document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{const d=b.dataset.dir;move(d==="left"?-1:d==="right"?1:0,d==="up"?-1:d==="down"?1:0)});
  const pad=document.querySelector("#walk-joystick"),stick=document.querySelector("#walk-stick");
@@ -53,7 +53,7 @@ window.addEventListener("keydown",e=>{
  if(s.page!=="clinic"||e.altKey||e.ctrlKey||e.metaKey)return;
  const m={ArrowUp:[0,-1],w:[0,-1],W:[0,-1],ArrowDown:[0,1],s:[0,1],S:[0,1],ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],ArrowRight:[1,0],d:[1,0],D:[1,0]};
  if(m[e.key]){e.preventDefault();const b=document.querySelectorAll("[data-dir]");const dir=m[e.key];const name=dir[1]<0?"up":dir[1]>0?"down":dir[0]<0?"left":"right";document.querySelector('[data-dir="'+name+'"]')?.click()}
- if((e.key==="Enter"||e.key.toLowerCase()==="e")&&!document.querySelector("#walk-talk")?.hidden){e.preventDefault();go("history")}
+ if((e.key==="Enter"||e.key.toLowerCase()==="e")&&!document.querySelector("#walk-talk")?.hidden){e.preventDefault();document.querySelector("#walk-talk")?.click()}
 });
 if(s.page==="clinic")render();
 })();
