@@ -33,6 +33,15 @@ export async function mountExam3D(host,onSelect){
    const crown=new T.Mesh(shape,enamel);
    crown.scale.set(...dims);crown.position.set(x,y+(upper?-.33:.33),z);
    crown.rotation.y=-a+Math.PI/2;
+   if(type==="premolar"||type==="molar"){
+    const points=type==="premolar"?[[-.42,0],[.42,0]]:[[-.43,-.45],[.43,-.45],[-.43,.45],[.43,.45]];
+    for(const [cx,cz] of points){
+     const cusp=new T.Mesh(new T.ConeGeometry(.31,.35,9),enamel);
+     cusp.position.set(cx,upper?-.94:.94,cz);
+     cusp.rotation.z=upper?Math.PI:0;
+     crown.add(cusp);
+    }
+   }
    const quadrant=upper?(i<8?1:2):(i<8?4:3);
    const position=i<8?8-i:i-7;
    // FDI positions run from third molar (8) at the distal end to central incisor (1).
@@ -44,7 +53,7 @@ export async function mountExam3D(host,onSelect){
  const ray=new T.Raycaster(),pointer=new T.Vector2();
  let selected=null,mode="both",drag=false,px=0,py=0,raf=0,dead=false;
  function pick(tooth){selected=tooth;teeth.forEach(t=>t.material=t===tooth?selectedMat:enamel);onSelect?.(tooth.userData.fdi,tooth.userData.arch)}
- function tap(e){const b=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(teeth.filter(t=>t.parent.visible))[0];if(hit)pick(hit.object)}
+ function tap(e){const b=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(teeth.filter(t=>t.parent.visible),true)[0];if(hit){let part=hit.object;while(part&&!teeth.includes(part))part=part.parent;if(part)pick(part)}}
  function view(next){mode=next;arches.upper.visible=mode!=="lower";arches.lower.visible=mode!=="upper";if(selected&&!selected.parent.visible){selected=null;teeth.forEach(t=>t.material=enamel);onSelect?.(null,null)}}
  const controls=host.parentElement?.querySelectorAll("[data-arch]")||[];
  controls.forEach(b=>b.addEventListener("click",()=>{controls.forEach(x=>x.classList.toggle("active",x===b));view(b.dataset.arch)}));
