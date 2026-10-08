@@ -15,6 +15,7 @@ function setupWalk(){
  function draw(){player.style.left=x+"%";player.style.top=y+"%";const ok=near();talk.hidden=!ok;status.textContent=ok?"Patient in range · INTERACT":"Approach the red marker";document.querySelector("#walk-patient")?.classList.toggle("walk-near",ok);s.walkX=x;s.walkY=y;save()}
  function move(dx,dy){if(s.page!=="clinic")return;x=Math.max(8,Math.min(92,x+dx*3));y=Math.max(9,Math.min(90,y+dy*3));draw()}
  draw();talk.onclick=()=>go("history");
+ import("./clinic-3d.js?v=050").then(m=>m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}))).catch(e=>console.warn("3D fallback",e));
  document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{const d=b.dataset.dir;move(d==="left"?-1:d==="right"?1:0,d==="up"?-1:d==="down"?1:0)});
  const pad=document.querySelector("#walk-joystick"),stick=document.querySelector("#walk-stick");
  if(pad&&stick){
