@@ -12,3 +12,7 @@
 
 /* v0.8 Three.js portrait overlays CSS fallback only when ready */
 .patient-3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;display:block}.patient-three-ready .patient-face,.patient-three-ready .patient-shoulders{visibility:hidden}.patient-three-ready .patient-caption{z-index:5}
+
+/* v0.8.5: never flash a different patient while 3D portrait loads */
+.patient-history .patient-shot .patient-face,.patient-history .patient-shot .patient-shoulders{display:none!important}
+.patient-history .patient-shot:not(.patient-three-ready):after{content:"PREPARING PATIENT VIEW…";position:absolute;top:50%;left:0;width:100%;text-align:center;font-size:11px;letter-spacing:.18em;color:#b7a892}
