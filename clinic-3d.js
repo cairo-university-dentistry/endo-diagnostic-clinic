@@ -18,7 +18,7 @@ export async function mountClinic3D(stage,getPosition){
  const amb=new T.HemisphereLight(0xe8f1ef,0x22272b,2.3);scene.add(amb);
  const key=new T.DirectionalLight(0xffebd0,2.4);key.position.set(-5,13,7);scene.add(key);
  const materials={floor:0x313d40,wall:0x596366,ivory:0xe8e5db,metal:0x87989a,wood:0x9e9078,teal:0x76a39c,red:0xa24b52,skin:0xc6957d,dark:0x1a2428,glass:0x92b7ba};
- function mat(c){return new T.MeshStandardMaterial({color:c,roughness:.75,metalness:c===materials.metal?.35:0})}
+ function mat(c){return new T.MeshStandardMaterial({color:c,roughness:.75,metalness:c===materials.metal ? 0.35 : 0})}
  function box(w,h,d,x,y,z,c){const o=new T.Mesh(new T.BoxGeometry(w,h,d),mat(c));o.position.set(x,y,z);scene.add(o);return o}
  function cylinder(r,h,x,y,z,c){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,14),mat(c));o.position.set(x,y,z);scene.add(o);return o}
  box(13,.25,9,0,-.18,0,materials.floor);
