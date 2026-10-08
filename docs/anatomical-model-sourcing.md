@@ -29,3 +29,12 @@ The examination view uses procedural illustrative teeth, **not** an anatomically
 6. Label model limitations; do not imply patient-specific pathology is present in generic anatomical asset.
 
 **Status:** Research and asset evaluation completed; replacement NOT installed. Do not mark done until verified model integration and mobile QA.
+
+
+## Asset received and converted (2026-10-08)
+User provided the Sketchfab Permanent Dentition glTF ZIP. Its license.txt explicitly states CC BY 4.0 and author University of Dundee, School of Dentistry.
+- 33 glTF mesh primitives, 86 nodes. Lower jaw has 16 mesh nodes; upper has 17 mesh nodes (one tooth may have multiple primitives), so do not map FDI by mesh index without validating.
+- Source ZIP contained scene.gltf, scene.bin and 16 textures.
+- Converted to self-contained GLB (11.1 MB), and mobile GLB with 768px JPEG textures (~2.1 MB). Both outputs were created in the conversation's sandbox; they have **not** been committed to GitHub.
+- Next: upload the mobile GLB to repository path `models/permanent-dentition.glb`, inspect node hierarchy and map tooth components to correct FDI, then enable GLTFLoader and QA on iPhone.
+- Attribution text: This work is based on "Permanent Dentition" by University of Dundee, School of Dentistry, licensed under CC BY 4.0. https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b
