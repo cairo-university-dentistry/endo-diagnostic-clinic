@@ -40,13 +40,13 @@ export async function mountPatientFace(stage,expression="neutral"){
  brows[0].rotation.z=expression==="pain"?-.28:expression==="uncertain"?.2:-.06;
  brows[1].rotation.z=expression==="pain"?.28:expression==="uncertain"?.12:.06;
  brows[0].position.y=config[1];brows[1].position.y=config[1]+(expression==="uncertain"?.13:0);
- const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+ const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches||false;
  let disposed=false,raf=0,start=performance.now();
  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
  const ro=new ResizeObserver(resize);ro.observe(stage);resize();
  function frame(t){if(disposed)return;if(!stage.isConnected){dispose();return}
  const dt=(t-start)/1000,blink=!reduce&&(dt%4.8<.14||dt%7.1<.11);
- eyes.forEach(e=>e.scale.y=blink?.15:.013);
+ eyes.forEach(e=>e.scale.y=blink?.10:.013);
  const speaking=!reduce&&dt<2.9;mouth.scale.y=speaking?.055+Math.abs(Math.sin(dt*12))*.1:.055;
  mouthInner.scale.y=speaking?.014+Math.abs(Math.sin(dt*12))*.1:.014;
  head.rotation.z=reduce?0:config[0]+Math.sin(dt*.8)*.023;
