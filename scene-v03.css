@@ -30,3 +30,6 @@
 .walk-patient:after{background:#49403d;box-shadow:11px 0 0 #49403d}
 .walk-floor-glow{position:absolute;left:55%;top:30%;width:30%;height:45%;border-radius:50%;background:#f5e5bd16;filter:blur(24px);pointer-events:none}
 @media(max-width:700px){.walk-seat{width:36px;height:28px}.walk-cabinet{height:75px}.walk-chair:after{height:35px}.walk-hint{font-size:.7rem;max-width:80%;padding:10px}}
+
+/* v0.5 WebGL overlay; preserve joystick and interaction UI */
+.webgl-clinic{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;touch-action:none}.walk-stage.three-ready .walk-world{visibility:hidden}.walk-overlay{z-index:2}.walk-stage .walk-hint,.walk-stage .walk-action,.walk-stage .walk-status{z-index:3}
