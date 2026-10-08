@@ -3,3 +3,6 @@
 .walk-joystick:before{content:"";position:absolute;inset:18px;border:1px dashed #c7b58b50;border-radius:50%}
 .walk-stick{position:absolute;left:50%;top:50%;width:57px;height:57px;border-radius:50%;background:linear-gradient(145deg,#d2c19a,#7d6f52);border:2px solid #f0e5c8;box-shadow:0 6px 18px #0009;transform:translate(-50%,-50%);pointer-events:none}
 @media(hover:none) and (pointer:coarse){.walk-joystick{display:block}.walk-controls{display:none}.walk-action{bottom:26px;left:auto;right:14px;transform:none}.walk-status{bottom:160px}}
+
+/* v0.3.4: mobile Safari joystick fallback */
+@media(max-width:800px){.walk-joystick{display:block!important}.walk-controls{display:none!important}.walk-action{bottom:26px;left:auto;right:14px;transform:none}.walk-status{bottom:160px}}
