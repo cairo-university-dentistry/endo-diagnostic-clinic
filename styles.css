@@ -16,3 +16,18 @@
 /* v0.8.5: never flash a different patient while 3D portrait loads */
 .patient-history .patient-shot .patient-face,.patient-history .patient-shot .patient-shoulders{display:none!important}
 .patient-history .patient-shot:not(.patient-three-ready):after{content:"PREPARING PATIENT VIEW…";position:absolute;top:50%;left:0;width:100%;text-align:center;font-size:11px;letter-spacing:.18em;color:#b7a892}
+
+/* v1.0 Hybrid camera dental examination */
+.exam-workspace{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,.8fr);gap:20px;margin-top:24px}
+.exam-view{min-width:0;background:linear-gradient(160deg,#16252b,#0b1519);border:1px solid #526267;border-radius:24px;overflow:hidden;position:relative}
+.exam-view-label{position:absolute;top:18px;left:18px;z-index:2;color:#cbb990;font-size:11px;letter-spacing:.13em;pointer-events:none}
+.exam-3d-stage{height:430px;width:100%;min-width:0}
+.exam-selection{position:absolute;bottom:18px;left:18px;right:18px;text-align:center;color:#f2e7d3;font-size:13px;pointer-events:none}
+.exam-tray{display:flex;flex-direction:column;gap:12px;padding:22px;border:1px solid #3a4649;border-radius:22px;background:#161d21}
+.exam-tool{border:1px solid #526267;background:#222f33;color:#f0e8d8;border-radius:12px;padding:14px;text-align:left;font:inherit;cursor:pointer}
+.exam-tool.active{border-color:#e6c88e;background:#39443d}
+.exam-tray .btn{width:100%;white-space:normal}
+.exam-tray .btn:disabled{opacity:.45;cursor:not-allowed}
+.exam-disclaimer{color:#aebbbd;font-size:12px;line-height:1.6}
+.exam-notes{color:#e2d5b8;font-size:13px;min-height:35px;overflow-wrap:anywhere}
+@media(max-width:760px){.exam-workspace{grid-template-columns:1fr;gap:14px}.exam-3d-stage{height:330px}.exam-tray{padding:18px}.exam-hybrid h1{line-height:1.1}}
