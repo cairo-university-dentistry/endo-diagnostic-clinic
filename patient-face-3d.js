@@ -4,6 +4,19 @@ export async function mountPatientFace(stage,expression="neutral"){
  if(!stage||!window.WebGLRenderingContext)return;
  let T;try{T=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js")}catch(e){return}
  if(!stage.isConnected)return;
+ // Prefer a production GLB avatar with facial blendshapes when a licensed asset is configured.
+ // Until then retain the procedural prototype rather than claim it is cinematic.
+ const modelUrl=window.ENDO_PATIENT_MODEL_URL;
+ if(modelUrl){
+   try{
+     const {GLTFLoader}=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js");
+     const loader=new GLTFLoader();
+     const gltf=await loader.loadAsync(modelUrl);
+     if(!stage.isConnected)return;
+     return mountRiggedPortrait(stage,T,gltf,expression);
+   }catch(err){console.warn("Avatar unavailable; showing prototype",err)}
+ }
+
  if(current)current();
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(30,1,.1,30);
  camera.position.set(0,.08,7.8);camera.lookAt(0,.05,0);
@@ -54,4 +67,57 @@ export async function mountPatientFace(stage,expression="neutral"){
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
  function dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();scene.traverse(o=>{o.geometry?.dispose();o.material?.dispose?.()});renderer.dispose();renderer.domElement.remove();if(current===dispose)current=null}
  current=dispose;stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
+}
+
+async function mountRiggedPortrait(stage,T,gltf,expression){
+ const scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.1,100);
+ const renderer=new T.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"});
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+ renderer.outputColorSpace=T.SRGBColorSpace;
+ renderer.domElement.className="patient-3d-canvas";stage.prepend(renderer.domElement);
+ scene.add(new T.HemisphereLight(0xffeadb,0x344350,2.1));
+ const key=new T.DirectionalLight(0xffe5cf,2.3);key.position.set(-3,5,5);scene.add(key);
+ const rim=new T.DirectionalLight(0xa5c7d8,1.3);rim.position.set(3,2,-3);scene.add(rim);
+ const avatar=gltf.scene;scene.add(avatar);avatar.updateMatrixWorld(true);
+ const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
+ // Frame the head/upper body for portrait composition regardless of avatar scale.
+ const focusY=box.max.y-size.y*.18;
+ camera.position.set(center.x,focusY,box.max.z+Math.max(size.y*.65,size.x*2.1));
+ camera.lookAt(center.x,focusY,center.z);
+ const meshes=[],headBones=[];
+ avatar.traverse(o=>{
+   if(o.isMesh&&o.morphTargetDictionary)meshes.push(o);
+   if(o.isBone&&/^(head|mixamorighead|rig_head)$/i.test(o.name))headBones.push({bone:o,rotation:o.rotation.clone()});
+ });
+ const emotion={
+   pain:{browDownLeft:.75,browDownRight:.75,eyeSquintLeft:.5,eyeSquintRight:.5,mouthFrownLeft:.6,mouthFrownRight:.6},
+   uncertain:{browOuterUpLeft:.8,browOuterUpRight:.25,browInnerUp:.3,mouthPressLeft:.25,mouthPressRight:.25},
+   concerned:{browInnerUp:.7,eyeWideLeft:.25,eyeWideRight:.25,mouthFrownLeft:.35,mouthFrownRight:.35},
+   tired:{eyeSquintLeft:.55,eyeSquintRight:.55,browInnerUp:.25,mouthFrownLeft:.25,mouthFrownRight:.25}
+ }[expression]||{};
+ let disposed=false,raf=0;const start=performance.now(),reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches||false;
+ function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+ const ro=new ResizeObserver(resize);ro.observe(stage);resize();
+ function frame(t){
+   if(disposed)return;if(!stage.isConnected){dispose();return}
+   const seconds=(t-start)/1000,blink=!reduce&&(seconds%4.9<.12),talk=!reduce&&seconds<2.8?Math.abs(Math.sin(seconds*10))*.35:0;
+   for(const mesh of meshes){
+     for(const [name,index] of Object.entries(mesh.morphTargetDictionary)){
+       const target=blink&&/eyeBlink(Left|Right)|eyesClosed/i.test(name)?1:
+        /jawOpen|mouthOpen/i.test(name)?talk:(emotion[name]||0);
+       mesh.morphTargetInfluences[index]+=(target-mesh.morphTargetInfluences[index])*.14;
+     }
+   }
+   for(const {bone,rotation} of headBones){
+     bone.rotation.y=rotation.y+(reduce?0:Math.sin(seconds*.7)*.045);
+     bone.rotation.z=rotation.z+(reduce?0:Math.sin(seconds*.6)*.025);
+   }
+   renderer.render(scene,camera);raf=requestAnimationFrame(frame)
+ }
+ function dispose(){
+   if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();
+   avatar.traverse(o=>{o.geometry?.dispose();if(o.material){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>m.dispose())}});
+   renderer.dispose();renderer.domElement.remove();stage.classList.remove("patient-three-ready");
+ }
+ stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
 }
