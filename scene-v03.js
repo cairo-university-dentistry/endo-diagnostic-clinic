@@ -4,14 +4,14 @@ const oldClinic=clinic;
 window.clinic=function(){
  shell(`<main class="screen"><div class="eye">DAY 01 · INTERACTIVE CLINIC</div><h1 style="font-size:clamp(2.6rem,6vw,5.2rem)">Your first patient<br>has arrived.</h1><p class="lead">Move through the clinic to meet your patient. Use WASD / arrow keys on desktop, or the joystick on mobile.</p>
  <section class="walk-stage" aria-label="Interactive dental clinic"><div class="walk-world"><div class="walk-room walk-main"></div><div class="walk-room walk-reception"></div><div class="walk-room walk-op"></div><div class="walk-desk"></div><div class="walk-desk-screen"></div><div class="walk-seat waiting-a"></div><div class="walk-seat waiting-b"></div><div class="walk-cabinet"></div><div class="walk-tray"></div><div class="walk-lamp"></div><div class="walk-chair"></div><div class="walk-patient" id="walk-patient"></div><div class="walk-player" id="walk-player"></div><div class="walk-floor-glow"></div></div>
- <div class="walk-overlay"><div class="walk-hint">DAY 01 &nbsp; / &nbsp; MEET PATIENT 01</div><div class="walk-joystick" id="walk-joystick" aria-label="Movement joystick"><div class="walk-stick" id="walk-stick"></div></div><div class="walk-controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-dir="down" aria-label="Move down">↓</button><button data-dir="right" aria-label="Move right">→</button></div><button class="btn primary walk-action" id="walk-talk" hidden>Talk to Patient →</button><div class="walk-status" id="walk-status">Approach the red marker</div></div></section></main>`);
+ <div class="walk-overlay"><div class="walk-hint">DAY 01 &nbsp; / &nbsp; MEET PATIENT 01</div><div class="walk-joystick" id="walk-joystick" aria-label="Movement joystick"><div class="walk-stick" id="walk-stick"></div></div><div class="walk-controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-dir="down" aria-label="Move down">↓</button><button data-dir="right" aria-label="Move right">→</button></div><button class="btn primary walk-action" id="walk-talk" hidden>Talk to Patient →</button><div class="walk-status" id="walk-status">Approach the patient in the waiting area</div></div></section></main>`);
  setupWalk();
 };
 function setupWalk(){
  const player=document.querySelector("#walk-player"),talk=document.querySelector("#walk-talk"),status=document.querySelector("#walk-status");
  if(!player)return;
  let x=Number.isFinite(s.walkX)?s.walkX:37,y=Number.isFinite(s.walkY)?s.walkY:82;
- const near=()=>Math.hypot(x-71,y-30)<16;
+ const near=()=>Math.hypot(x-22,y-70)<18;
  function draw(){player.style.left=x+"%";player.style.top=y+"%";const ok=near();talk.hidden=!ok;status.textContent=ok?"Patient in range · INTERACT":"Approach the red marker";document.querySelector("#walk-patient")?.classList.toggle("walk-near",ok);s.walkX=x;s.walkY=y;save()}
  // Collision coordinates match the Three.js world: X = (x/100-.5)*12.2, Z = (y/100-.5)*8.2.
  const obstacles=[
@@ -34,8 +34,9 @@ function setupWalk(){
  if(clear(x,ny))y=ny;
  draw();
  }
- if(!clear(x,y)){x=37;y=82}draw();talk.onclick=()=>{if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1900)};
- import("./clinic-3d.js?v=091").then(m=>m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}))).catch(e=>console.warn("3D fallback",e));
+ if(!clear(x,y)){x=37;y=82}draw();
+ if(s.patientTransfer){talk.hidden=true;status.textContent="Patient is walking to the dental chair…";}talk.onclick=()=>{if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1900)};
+ import("./clinic-3d.js?v=350").then(async m=>{await m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}));if(s.patientTransfer){const stage=document.querySelector(".walk-stage");stage?.addEventListener("patient-seated",()=>{if(s.page!=="clinic")return;s.patientTransfer=false;s.patientSeated=true;save();go("exam")},{once:true});stage?.dispatchEvent(new Event("patient-to-chair"))}}).catch(e=>console.warn("3D fallback",e));
  document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{const d=b.dataset.dir;move(d==="left"?-1:d==="right"?1:0,d==="up"?-1:d==="down"?1:0)});
  const pad=document.querySelector("#walk-joystick"),stick=document.querySelector("#walk-stick");
  if(pad&&stick){
