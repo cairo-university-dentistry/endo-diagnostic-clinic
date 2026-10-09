@@ -116,6 +116,7 @@ function patientReaction(fdi,tool){
  };
  return lines[tool]||{mood:"Calm",line:"I'm ready, doctor."};
 }
+function updateExamFace(mood){import("./patient-face-3d.js?v=361").then(m=>m.updatePatientFace(document.querySelector("#exam-patient-avatar"),mood==="In pain"?"pain":mood==="Concerned"?"concerned":"neutral"))}
 function showPatientReaction(fdi,tool){
  const panel=document.querySelector("#exam-patient-dialogue");if(!panel)return;
  const reaction=patientReaction(fdi,tool);
@@ -124,6 +125,7 @@ function showPatientReaction(fdi,tool){
  const mood=panel.querySelector(".patient-reaction-mood"),line=panel.querySelector(".patient-reaction-line");
  if(mood)mood.textContent=reaction.mood+" · FDI "+fdi;
  if(line)line.textContent="“"+reaction.line+"”";
+ updateExamFace(reaction.mood);
 }
 function examRunTest(){
  if(examSelected==null||examSelected<0){toast("Select a tooth first.");return}
