@@ -60,8 +60,8 @@ function submitDiagnosis(){
  const missingTests=allTests.filter(t=>!uniqueTests.has(t));
  const historyCount=(s.asked||[]).length;
  const feedbackRows=[
-  {label:"Pulpal reasoning",earned:pCorrect?45:0,max:45,detail:pCorrect?"Correct: deep caries with pain lingering after cold removal supports symptomatic irreversible pulpitis in this fictional case.":"Review: lingering cold pain and deep caries support symptomatic irreversible pulpitis. A positive EPT response alone does not indicate a healthy pulp."},
-  {label:"Apical reasoning",earned:aCorrect?25:0,max:25,detail:aCorrect?"Appropriate caution: without radiographic and complete examination data, the apical status cannot be confirmed.":"Review: negative percussion and palpation alone do not establish a definitive apical diagnosis. Additional assessment is required."},
+  {label:"Pulpal reasoning",earned:pCorrect?45:0,max:45,detail:pCorrect?activeCase().diagnosis.correctPulp:activeCase().diagnosis.incorrectPulp},
+  {label:"Apical reasoning",earned:aCorrect?25:0,max:25,detail:aCorrect?activeCase().diagnosis.correctApical:activeCase().diagnosis.incorrectApical},
   {label:"Clinical examination",earned:Math.min(20,uniqueTests.size*4),max:20,detail:completedTests.length?"Recorded on FDI 26: "+completedTests.join(", ")+".":"No examination tests recorded on FDI 26."},
   {label:"Patient history",earned:Math.min(10,historyCount*2),max:10,detail:historyCount+" history questions explored."}
  ];
@@ -103,7 +103,6 @@ let examSelected=-1;
 function examPick(i,arch){examSelected=i;const result=document.querySelector("#exam-patient-response");if(result)result.textContent="Press Perform Test to examine this tooth.";const label=document.querySelector("#exam-selected");if(label)label.textContent=i==null?"Tap a tooth to begin":"Selected tooth · FDI "+i+" · "+(arch==="upper"?"Upper":"Lower")+" arch";const button=document.querySelector("#exam-record");if(button)button.disabled=i==null||!s.tool}
 const examInstructions={"Visual":"Inspect crown and soft tissues.","Percussion":"Gently tap the selected tooth.","Palpation":"Palpate adjacent apical soft tissues.","Cold Test":"Apply cold and observe the response after removal.","EPT":"Assess sensory response using an electric pulp tester."};
 /* Fictional teaching case, not an observed real patient or a claim from the lecture. */
-const demoCase=activeCase();
 function demoResponse(fdi,tool){
  if(!Number.isInteger(fdi)||!tool)return null;
  if(fdi===activeCase().target)return activeCase().responses[tool]||null;
