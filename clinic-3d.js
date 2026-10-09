@@ -125,18 +125,19 @@ export async function mountClinic3D(stage,getPosition){
   new GLTFLoader().load("./assets/patient/scene.gltf",gltf=>{
    if(!stage.isConnected)return;
    const model=gltf.scene;
+   // Measure in model-local coordinates: world-space bounds inherit the clinic scale.
+   model.updateMatrixWorld(true);
    const bounds=new T.Box3().setFromObject(model);
    const size=bounds.getSize(new T.Vector3());
    if(!size.y||!Number.isFinite(size.y))return;
-   model.scale.multiplyScalar(1.72/size.y);
-   model.updateMatrixWorld(true);
-   const aligned=new T.Box3().setFromObject(model);
-   const center=aligned.getCenter(new T.Vector3());
-   model.position.x-=center.x;
-   model.position.z-=center.z;
-   model.position.y-=aligned.min.y;
+   const factor=1.72/size.y;
+   const center=bounds.getCenter(new T.Vector3());
+   model.position.set(-center.x,-bounds.min.y,-center.z);
+   const wrapper=new T.Group();
+   wrapper.scale.setScalar(factor);
+   wrapper.add(model);
    patientFallback.forEach(o=>o.visible=false);
-   patient.add(model);
+   patient.add(wrapper);
    console.info("ENDO: imported rigged patient preview loaded");
   },undefined,()=>console.info("ENDO: using original patient until preview assets are uploaded"));
  }).catch(()=>{});
