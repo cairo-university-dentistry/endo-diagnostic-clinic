@@ -11,8 +11,10 @@ function setupWalk(){
  const player=document.querySelector("#walk-player"),talk=document.querySelector("#walk-talk"),status=document.querySelector("#walk-status");
  if(!player)return;
  let x=Number.isFinite(s.walkX)?s.walkX:37,y=Number.isFinite(s.walkY)?s.walkY:82;
- const near=()=>Math.hypot(x-22,y-58)<18;
- function draw(){player.style.left=x+"%";player.style.top=y+"%";const ok=near();talk.hidden=s.patientTransfer||s.patientSeated?!s.patientSeated:!ok;status.textContent=s.patientSeated?"Patient is ready at the dental chair · Ask before examination":s.patientTransfer?"Follow the patient to the operatory…":ok?"Patient in range · INTERACT":"Approach the patient in the waiting area";document.querySelector("#walk-patient")?.classList.toggle("walk-near",ok);s.walkX=x;s.walkY=y;save()}
+ const nearWaiting=()=>Math.hypot(x-22,y-58)<18;
+ const nearChair=()=>Math.hypot(x-70,y-54)<19;
+ const near=()=>s.patientSeated?nearChair():nearWaiting();
+ function draw(){player.style.left=x+"%";player.style.top=y+"%";const ok=near();talk.hidden=!!s.patientTransfer||!ok;status.textContent=s.patientSeated?(ok?"Patient in range · Ask before examination":"Walk to the dental chair and speak to the patient"):s.patientTransfer?"Follow the patient to the operatory…":ok?"Patient in range · INTERACT":"Approach the patient in the waiting area";document.querySelector("#walk-patient")?.classList.toggle("walk-near",ok);s.walkX=x;s.walkY=y;save()}
  // Collision coordinates match the Three.js world: X = (x/100-.5)*12.2, Z = (y/100-.5)*8.2.
  const obstacles=[
  [-4.1,-2.5,3.4,1.0],[-4.9,1.65,1.1,1.0],[-3.45,1.65,1.1,1.0],
@@ -35,8 +37,8 @@ function setupWalk(){
  draw();
  }
  if(!clear(x,y)){x=37;y=82}draw();
- if(s.patientTransfer){talk.hidden=true;status.textContent="Patient is walking to the dental chair…";}if(s.patientSeated){talk.hidden=false;talk.textContent="Ask Patient Before Examination →"}talk.onclick=()=>{if(s.patientSeated){s.patientSeated=false;save();go("preexam");return}if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1900)};
- import("./clinic-3d.js?v=352").then(async m=>{await m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}));if(s.patientTransfer){const stage=document.querySelector(".walk-stage");stage?.addEventListener("patient-seated",()=>{if(s.page!=="clinic")return;s.patientTransfer=false;s.patientSeated=true;save();talk.hidden=false;talk.disabled=false;talk.textContent="Ask Patient Before Examination →";status.textContent="Patient seated · Ask permission before examination"},{once:true});stage?.dispatchEvent(new Event("patient-to-chair"))}}).catch(e=>console.warn("3D fallback",e));
+ if(s.patientTransfer){talk.hidden=true;status.textContent="Patient is walking to the dental chair…";}if(s.patientSeated){talk.hidden=!nearChair();talk.textContent="Ask Patient Before Examination →"}talk.onclick=()=>{if(s.patientSeated){if(!nearChair()){toast("Approach the patient at the dental chair first.");return}s.patientSeated=false;save();go("preexam");return}if(talk.disabled)return;s.patientIntro=true;save();talk.disabled=true;talk.textContent="Meeting Patient…";document.querySelector(".walk-stage")?.dispatchEvent(new Event("patient-focus"));window.setTimeout(()=>{if(s.page==="clinic")go("history")},1900)};
+ import("./clinic-3d.js?v=352").then(async m=>{await m.mountClinic3D(document.querySelector(".walk-stage"),()=>({x,y}));if(s.patientTransfer){const stage=document.querySelector(".walk-stage");stage?.addEventListener("patient-seated",()=>{if(s.page!=="clinic")return;s.patientTransfer=false;s.patientSeated=true;save();talk.hidden=!nearChair();talk.disabled=false;talk.textContent="Ask Patient Before Examination →";status.textContent="Patient seated · Walk to the dental chair to speak before examination"},{once:true});stage?.dispatchEvent(new Event("patient-to-chair"))}}).catch(e=>console.warn("3D fallback",e));
  document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{const d=b.dataset.dir;move(d==="left"?-1:d==="right"?1:0,d==="up"?-1:d==="down"?1:0)});
  const pad=document.querySelector("#walk-joystick"),stick=document.querySelector("#walk-stick");
  if(pad&&stick){
