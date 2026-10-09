@@ -1,6 +1,8 @@
 /* v1.3 — University of Dundee Permanent Dentition (CC BY 4.0).
    Tooth numbering is a preliminary left/right geometric mapping pending clinical QA. */
 let activeDispose=null;
+let activeInstrument=null;
+export function performInstrument(tool,fdi){if(activeInstrument)activeInstrument(tool,fdi)}
 export async function mountExam3D(host,onSelect){
  if(!host)return;
  const T=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js");
@@ -18,6 +20,26 @@ export async function mountExam3D(host,onSelect){
  const arches={upper:new T.Group(),lower:new T.Group()};root.add(arches.upper,arches.lower);
  const status=document.createElement("div");status.style.cssText="position:absolute;top:92px;left:15px;right:15px;text-align:center;color:#dfcba4;font:12px sans-serif;pointer-events:none";status.textContent="Loading anatomical dentition…";host.parentElement.appendChild(status);
  let teeth=[],selected=null,drag=false,px=0,py=0,dead=false,raf=0;
+ const instrument=new T.Group();scene.add(instrument);instrument.visible=false;
+ const steel=new T.MeshStandardMaterial({color:0xc3d2d9,metalness:.8,roughness:.22});
+ const dark=new T.MeshStandardMaterial({color:0x27363c,metalness:.3,roughness:.35});
+ const tip=new T.MeshStandardMaterial({color:0xe2f6ff,roughness:.85});
+ const handle=new T.Mesh(new T.CylinderGeometry(.035,.05,.72,12),steel);instrument.add(handle);
+ const head=new T.Mesh(new T.SphereGeometry(.075,14,10),tip);head.position.y=-.4;instrument.add(head);
+ const grip=new T.Mesh(new T.CylinderGeometry(.052,.052,.17,12),dark);grip.position.y=.24;instrument.add(grip);
+ let motion=null;
+ activeInstrument=(tool,fdi)=>{
+   if(tool!=="Cold Test"&&tool!=="Percussion")return;
+   const tooth=teeth.find(t=>t.userData.fdi===fdi&&t.parent.visible);
+   if(!tooth||dead)return;
+   tooth.updateWorldMatrix(true,true);
+   const box=new T.Box3().setFromObject(tooth);
+   const centerPoint=box.getCenter(new T.Vector3());
+   const target=new T.Vector3(centerPoint.x,centerPoint.y,centerPoint.z);
+   instrument.visible=true;
+   head.material=tool==="Cold Test"?tip:steel;
+   motion={target,start:performance.now(),tool};
+ };
  function clearPick(){selected=null;teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.userData.baseMaterial)o.material=o.userData.baseMaterial}));onSelect?.(null,null)}
  function pick(t){clearPick();selected=t;t.traverse(o=>{if(o.isMesh){o.material=o.userData.baseMaterial.clone();o.material.color.set(0xffd18b);o.material.emissive?.set(0x49300e)}});onSelect?.(t.userData.fdi,t.userData.arch)}
  function tap(e){const b=renderer.domElement.getBoundingClientRect();const p=new T.Vector2((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);const ray=new T.Raycaster();ray.setFromCamera(p,camera);const hit=ray.intersectObjects(teeth.filter(t=>t.parent.visible),true)[0];if(hit){let o=hit.object;while(o&&!teeth.includes(o))o=o.parent;if(o)pick(o)}}
@@ -32,8 +54,19 @@ export async function mountExam3D(host,onSelect){
  let pinch=null;renderer.domElement.addEventListener("touchmove",e=>{if(e.touches.length!==2){pinch=null;return}e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch!==null)zoom((pinch-d)*.018);pinch=d},{passive:false});renderer.domElement.addEventListener("touchend",()=>pinch=null);
  function resize(){if(dead)return;const w=host.clientWidth,h=host.clientHeight;if(w&&h){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}}
  const ro=new ResizeObserver(resize);ro.observe(host);resize();
- function frame(){if(dead)return;if(!host.isConnected){dispose();return}renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
- function dispose(){if(dead)return;dead=true;cancelAnimationFrame(raf);ro.disconnect();renderer.dispose();renderer.domElement.remove();status.remove();teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.material!==o.userData.baseMaterial)o.material.dispose()}));if(activeDispose===dispose)activeDispose=null}
+ function frame(){if(dead)return;if(!host.isConnected){dispose();return}if(motion){
+  const progress=(performance.now()-motion.start)/1000;
+  if(progress>=1.45){instrument.visible=false;motion=null}
+  else{
+   const approach=Math.min(1,progress/.65);
+   const retreat=progress>1.05?Math.min(1,(progress-1.05)/.4):0;
+   const distance=.9*(1-approach+retreat);
+   instrument.position.copy(motion.target).add(new T.Vector3(.38+distance,.55+distance,.4));
+   instrument.rotation.z=-.65+(motion.tool==="Percussion"&&progress>.65&&progress<1.05?Math.sin((progress-.65)*48)*.15:0);
+  }
+ }
+ renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
+ function dispose(){if(dead)return;dead=true;cancelAnimationFrame(raf);ro.disconnect();renderer.dispose();renderer.domElement.remove();status.remove();if(activeInstrument){activeInstrument=null}instrument.traverse(o=>{if(o.geometry)o.geometry.dispose()});teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.material!==o.userData.baseMaterial)o.material.dispose()}));if(activeDispose===dispose)activeDispose=null}
  activeDispose=dispose;frame();
  try{
   const gltf=await new GLTFLoader().loadAsync("./permanent-dentition-mobile.glb");
