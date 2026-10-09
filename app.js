@@ -40,23 +40,38 @@ function home(){s.page="landing";s.from=false;save();render()}
 
 /* v1.0 Hybrid Camera: preserve isometric exploration; switch to focused 3D examination after history. */
 let examSelected=-1;
-function examPick(i,arch){examSelected=i;const label=document.querySelector("#exam-selected");if(label)label.textContent=i==null?"Tap a tooth to begin":"Selected tooth · FDI "+i+" · "+(arch==="upper"?"Upper":"Lower")+" arch";const button=document.querySelector("#exam-record");if(button)button.disabled=i==null||!s.tool}
-const examInstructions={"Visual":"Inspect crown and soft tissues. Record visible findings only.","Percussion":"Assess tenderness to gentle percussion; do not assume a response.","Palpation":"Assess the apical tissues for tenderness or swelling.","Cold Test":"Assess response to cold and its duration; only record known findings.","EPT":"Record the observed electric pulp test response, not a diagnosis."};
-function examRecord(){
+function examPick(i,arch){examSelected=i;const result=document.querySelector("#exam-patient-response");if(result)result.textContent="Press Perform Test to examine this tooth.";const label=document.querySelector("#exam-selected");if(label)label.textContent=i==null?"Tap a tooth to begin":"Selected tooth · FDI "+i+" · "+(arch==="upper"?"Upper":"Lower")+" arch";const button=document.querySelector("#exam-record");if(button)button.disabled=i==null||!s.tool}
+const examInstructions={"Visual":"Inspect crown and soft tissues.","Percussion":"Gently tap the selected tooth.","Palpation":"Palpate adjacent apical soft tissues.","Cold Test":"Apply cold and observe the response after removal.","EPT":"Assess sensory response using an electric pulp tester."};
+/* Fictional teaching case, not an observed real patient or a claim from the lecture. */
+const demoCase={id:"CASE 001 · FICTIONAL TRAINING PATIENT",target:26,
+ responses:{
+ "Visual":"Doctor: I can see a deep carious lesion on this tooth.",
+ "Percussion":"Patient: No significant pain when you tap this tooth.",
+ "Palpation":"Patient: I do not feel tenderness when you press the gum here.",
+ "Cold Test":"Patient: Ah! That hurts — the pain continues after the cold is removed.",
+ "EPT":"Patient: I can feel the electrical stimulus. A response is present."
+ }};
+function demoResponse(fdi,tool){
+ if(!Number.isInteger(fdi)||!tool)return null;
+ if(fdi===demoCase.target)return demoCase.responses[tool]||null;
+ return {"Visual":"Doctor: No obvious carious lesion in this training case.","Percussion":"Patient: No pain when you tap this tooth.","Palpation":"Patient: No tenderness in this area.","Cold Test":"Patient: I feel cold briefly; the sensation stops when you remove it.","EPT":"Patient: I feel the stimulus; a response is present."}[tool]||null;
+}
+function examRunTest(){
  if(examSelected==null||examSelected<0){toast("Select a tooth first.");return}
  if(!s.tool){toast("Select an examination tool first.");return}
- const el=document.querySelector("#exam-observation");const note=(el?.value||"").trim();
- if(!note){toast("Enter a finding or choose Result unavailable.");return}
- const item=s.tool+" · FDI "+examSelected+" · "+note;
- if(!s.find.includes(item))s.find.push(item);save();
- const notes=document.querySelector("#exam-notes");if(notes)notes.textContent=s.find.join(" · ");
- if(el)el.value="";toast("Observation recorded. No patient response simulated.");
+ const response=demoResponse(examSelected,s.tool);
+ if(!response)return;
+ const result=document.querySelector("#exam-patient-response");
+ if(result)result.textContent=response;
+ const item=s.tool+" · FDI "+examSelected+" · "+response;
+ if(!s.find.includes(item))s.find.push(item);
+ save();const notes=document.querySelector("#exam-notes");if(notes)notes.textContent=s.find.join(" · ");
+ toast("Test completed. Fictional case response recorded.");
 }
-function examSelectObservation(v){const el=document.querySelector("#exam-observation");if(el)el.value=v}
-function examTool(t){s.tool=t;save();const tip=document.querySelector("#exam-tool-guide");if(tip)tip.textContent=examInstructions[t]||"";document.querySelectorAll(".exam-tool").forEach(b=>b.classList.toggle("active",b.dataset.tool===t));const button=document.querySelector("#exam-record");if(button)button.disabled=examSelected==null||examSelected<0}
+function examTool(t){s.tool=t;save();const tip=document.querySelector("#exam-tool-guide");if(tip)tip.textContent=examInstructions[t]||"";document.querySelectorAll(".exam-tool").forEach(b=>b.classList.toggle("active",b.dataset.tool===t));const result=document.querySelector("#exam-patient-response");if(result)result.textContent="Select a tooth and press Perform Test.";const button=document.querySelector("#exam-record");if(button)button.disabled=examSelected==null||examSelected<0}
 exam=function(){
  examSelected=-1;
- shell(`<main class="screen exam-hybrid"><div class="eye">PATIENT 01 · CLINICAL EXAMINATION</div><h1 style="font-size:clamp(2rem,5vw,3.5rem)">Examination View</h1><p class="lead">Upper + Lower arches · Select a tooth, drag to rotate, pinch to zoom.</p><div class="exam-workspace"><div class="exam-view"><div class="exam-view-label">DENTAL EXAMINATION · 3D TRAINING MODEL</div><div class="exam-arch-controls"><button class="exam-arch active" data-arch="both">Both</button><button class="exam-arch" data-arch="upper">Upper</button><button class="exam-arch" data-arch="lower">Lower</button></div><div id="exam-3d-stage" class="exam-3d-stage"></div><div id="exam-selected" class="exam-selection">Tap a tooth to begin</div></div><aside class="exam-tray"><div class="eye">EXAMINATION TOOLS</div>${["Visual","Percussion","Palpation","Cold Test","EPT"].map(t=>`<button class="exam-tool ${s.tool===t?"active":""}" data-tool="${t}" onclick="examTool('${t}')">${t}</button>`).join("")}<div class="eye">TEST PROCEDURE</div><p class="exam-disclaimer" id="exam-tool-guide">${examInstructions[s.tool]||"Choose a tool to see the procedure."}</p><label class="eye" for="exam-observation">OBSERVED FINDING</label><textarea id="exam-observation" class="exam-observation" rows="2" placeholder="Enter a finding from the case; do not guess."></textarea><button class="exam-tool" onclick="examSelectObservation(&quot;Result unavailable / not assessed&quot;)">Result unavailable</button><button class="btn primary" id="exam-record" onclick="examRecord()" disabled>Save Examination Finding</button><p class="exam-disclaimer">Training prototype: records observations entered by the learner; patient responses are not simulated. FDI numbering is provisional. Verification: select the upper central incisors (11 and 21), then the lower central incisors (41 and 31). Confirm each side before relying on these labels.</p><div class="eye">RECORDED ACTIONS</div><div id="exam-notes" class="exam-notes">${s.find.length?s.find.join(" · "):"None yet"}</div><button class="btn" onclick="go('history')">← Patient History</button><button class="btn" onclick="interpret()">Interpret Evidence →</button></aside></div></main>`);
+ shell(`<main class="screen exam-hybrid"><div class="eye">PATIENT 01 · CLINICAL EXAMINATION</div><h1 style="font-size:clamp(2rem,5vw,3.5rem)">Examination View</h1><p class="lead">Upper + Lower arches · Select a tooth, drag to rotate, pinch to zoom.</p><div class="exam-workspace"><div class="exam-view"><div class="exam-view-label">DENTAL EXAMINATION · 3D TRAINING MODEL</div><div class="exam-arch-controls"><button class="exam-arch active" data-arch="both">Both</button><button class="exam-arch" data-arch="upper">Upper</button><button class="exam-arch" data-arch="lower">Lower</button></div><div id="exam-3d-stage" class="exam-3d-stage"></div><div id="exam-selected" class="exam-selection">Tap a tooth to begin</div></div><aside class="exam-tray"><div class="eye">EXAMINATION TOOLS</div>${["Visual","Percussion","Palpation","Cold Test","EPT"].map(t=>`<button class="exam-tool ${s.tool===t?"active":""}" data-tool="${t}" onclick="examTool('${t}')">${t}</button>`).join("")}<div class="eye">TEST PROCEDURE</div><p class="exam-disclaimer" id="exam-tool-guide">${examInstructions[s.tool]||"Choose a tool to see the procedure."}</p><div class="eye">PATIENT RESPONSE</div><div id="exam-patient-response" class="exam-notes" aria-live="polite">Select a tooth and press Perform Test.</div><button class="btn primary" id="exam-record" onclick="examRunTest()" disabled>Perform Test</button><p class="exam-disclaimer">CASE 001 is a fictional teaching scenario with predefined responses, not actual patient data. Target tooth: FDI 26. Responses are illustrative and do not establish a diagnosis by themselves.</p><div class="eye">RECORDED ACTIONS</div><div id="exam-notes" class="exam-notes">${s.find.length?s.find.join(" · "):"None yet"}</div><button class="btn" onclick="go('history')">← Patient History</button><button class="btn" onclick="interpret()">Interpret Evidence →</button></aside></div></main>`);
  import("./exam-anatomy.js?v=140").then(m=>m.mountExam3D(document.querySelector("#exam-3d-stage"),examPick)).catch(e=>console.warn("Exam 3D unavailable",e));
 };
 
