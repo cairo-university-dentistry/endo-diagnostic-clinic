@@ -77,7 +77,7 @@ export async function mountExam3D(host,onSelect){
         new T.MeshStandardMaterial({color:0x4d2a16,roughness:1})
       );
       spot.scale.set(1,0.16,0.8);
-      spot.position.set(middle.x,bounds.min.y+0.02,middle.z);
+      spot.position.copy(arches.upper.worldToLocal(new T.Vector3(middle.x,bounds.min.y+0.02,middle.z)));
       arches.upper.add(spot);
     }
    });
