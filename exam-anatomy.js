@@ -21,24 +21,35 @@ export async function mountExam3D(host,onSelect){
  const status=document.createElement("div");status.style.cssText="position:absolute;top:92px;left:15px;right:15px;text-align:center;color:#dfcba4;font:12px sans-serif;pointer-events:none";status.textContent="Loading anatomical dentition…";host.parentElement.appendChild(status);
  let teeth=[],selected=null,drag=false,px=0,py=0,dead=false,raf=0;
  const instrument=new T.Group();scene.add(instrument);instrument.visible=false;
- const steel=new T.MeshStandardMaterial({color:0xc3d2d9,metalness:.8,roughness:.22});
- const dark=new T.MeshStandardMaterial({color:0x27363c,metalness:.3,roughness:.35});
- const tip=new T.MeshStandardMaterial({color:0xe2f6ff,roughness:.85});
- const handle=new T.Mesh(new T.CylinderGeometry(.035,.05,.72,12),steel);instrument.add(handle);
- const head=new T.Mesh(new T.SphereGeometry(.075,14,10),tip);head.position.y=-.4;instrument.add(head);
- const grip=new T.Mesh(new T.CylinderGeometry(.052,.052,.17,12),dark);grip.position.y=.24;instrument.add(grip);
+ const steel=new T.MeshStandardMaterial({color:0xbac9d0,metalness:.85,roughness:.22});
+ const dark=new T.MeshStandardMaterial({color:0x30434a,metalness:.28,roughness:.5});
+ const cotton=new T.MeshStandardMaterial({color:0xeaf5fc,roughness:1});
+ function cylinder(parent,top,bottom,height,material,y){
+  const mesh=new T.Mesh(new T.CylinderGeometry(top,bottom,height,12),material);
+  mesh.position.y=y;parent.add(mesh);return mesh;
+ }
+ const coldTool=new T.Group();instrument.add(coldTool);
+ cylinder(coldTool,.042,.042,.67,dark,.08);
+ cylinder(coldTool,.022,.025,.24,steel,-.36);
+ const pellet=new T.Mesh(new T.SphereGeometry(.082,16,12),cotton);
+ pellet.scale.set(.9,.68,.9);pellet.position.y=-.51;coldTool.add(pellet);
+ const percussionTool=new T.Group();instrument.add(percussionTool);
+ cylinder(percussionTool,.046,.052,.78,steel,0);
+ cylinder(percussionTool,.065,.065,.19,dark,.2);
+ const percussionEnd=new T.Mesh(new T.SphereGeometry(.042,12,10),steel);
+ percussionEnd.position.y=-.41;percussionTool.add(percussionEnd);
  let motion=null;
  activeInstrument=(tool,fdi)=>{
-   if(tool!=="Cold Test"&&tool!=="Percussion")return;
-   const tooth=teeth.find(t=>t.userData.fdi===fdi&&t.parent.visible);
-   if(!tooth||dead)return;
-   tooth.updateWorldMatrix(true,true);
-   const box=new T.Box3().setFromObject(tooth);
-   const centerPoint=box.getCenter(new T.Vector3());
-   const target=new T.Vector3(centerPoint.x,centerPoint.y,centerPoint.z);
-   instrument.visible=true;
-   head.material=tool==="Cold Test"?tip:steel;
-   motion={target,start:performance.now(),tool};
+  if(tool!=="Cold Test"&&tool!=="Percussion")return;
+  const tooth=teeth.find(t=>t.userData.fdi===fdi&&t.parent.visible);
+  if(!tooth||dead)return;
+  tooth.updateWorldMatrix(true,true);
+  const bounds=new T.Box3().setFromObject(tooth);
+  const target=bounds.getCenter(new T.Vector3());
+  coldTool.visible=tool==="Cold Test";
+  percussionTool.visible=tool==="Percussion";
+  instrument.visible=true;
+  motion={target,start:performance.now(),tool};
  };
  function clearPick(){selected=null;teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.userData.baseMaterial)o.material=o.userData.baseMaterial}));onSelect?.(null,null)}
  function pick(t){clearPick();selected=t;t.traverse(o=>{if(o.isMesh){o.material=o.userData.baseMaterial.clone();o.material.color.set(0xffd18b);o.material.emissive?.set(0x49300e)}});onSelect?.(t.userData.fdi,t.userData.arch)}
@@ -62,7 +73,7 @@ export async function mountExam3D(host,onSelect){
    const retreat=progress>1.05?Math.min(1,(progress-1.05)/.4):0;
    const distance=.9*(1-approach+retreat);
    instrument.position.copy(motion.target).add(new T.Vector3(.38+distance,.55+distance,.4));
-   instrument.rotation.z=-.65+(motion.tool==="Percussion"&&progress>.65&&progress<1.05?Math.sin((progress-.65)*48)*.15:0);
+   instrument.rotation.z=motion.tool==="Cold Test"?-.6:(-.65+(progress>.65&&progress<1.05?Math.sin((progress-.65)*48)*.2:0));
   }
  }
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
