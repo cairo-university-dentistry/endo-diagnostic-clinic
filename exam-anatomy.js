@@ -67,6 +67,19 @@ export async function mountExam3D(host,onSelect){
     tooth.userData={fdi:quadrant*10+number,arch:g.arch};
     tooth.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.baseMaterial=o.material}});
     g.target.add(tooth);teeth.push(tooth);
+    if(tooth.userData.fdi===26){
+      tooth.updateWorldMatrix(true,true);
+      const bounds=new T.Box3().setFromObject(tooth);
+      const dimensions=bounds.getSize(new T.Vector3());
+      const middle=bounds.getCenter(new T.Vector3());
+      const spot=new T.Mesh(
+        new T.SphereGeometry(Math.min(dimensions.x,dimensions.z)*0.2,20,12),
+        new T.MeshStandardMaterial({color:0x4d2a16,roughness:1})
+      );
+      spot.scale.set(1,0.16,0.8);
+      spot.position.set(middle.x,bounds.min.y+0.02,middle.z);
+      arches.upper.add(spot);
+    }
    });
   }
   status.textContent="University of Dundee · CC BY 4.0 · Anatomical training model";
