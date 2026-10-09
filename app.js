@@ -69,7 +69,7 @@ function submitDiagnosis(){
  const details=feedbackRows.map(row=>'<article class="feedback-row"><div class="feedback-row-head"><strong>'+safe(row.label)+'</strong><span>'+row.earned+' / '+row.max+'</span></div><div class="feedback-meter"><i style="width:'+(100*row.earned/row.max)+'%"></i></div><p>'+safe(row.detail)+'</p></article>').join("");
  const checklist=allTests.map(t=>'<span class="feedback-test '+(uniqueTests.has(t)?"done":"pending")+'">'+(uniqueTests.has(t)?"✓ ":"○ ")+safe(t)+'</span>').join("");
  const recommendation=missingTests.length?'Consider completing '+missingTests.join(", ")+' on FDI 26 to broaden the evidence.':'All five available examination tools were used on FDI 26.';
- const result={score,pulp,apical,completedTests,missingTests,historyCount,completedAt:new Date().toISOString()};
+ const result={caseId:activeCase().id,target:activeCase().target,score,pulp,apical,completedTests,missingTests,historyCount,completedAt:new Date().toISOString()};
  localStorage.setItem(feedbackKey(activeCase().id),JSON.stringify(result));
  if(feedback)feedback.innerHTML='<section class="diagnosis-result clinical-feedback"><div class="eye">CASE 001 · CLINICAL FEEDBACK</div><h2>'+score+' / 100</h2><p class="feedback-verdict">'+(pCorrect&&aCorrect?"Both diagnostic assessments align with the case evidence.":"Review the diagnostic reasoning below.")+'</p><div class="feedback-rows">'+details+'</div><h3>Examination checklist · FDI 26</h3><div class="feedback-tests">'+checklist+'</div><p class="feedback-next">'+safe(recommendation)+'</p><p class="exam-disclaimer">Educational simulation only. The apical status remains unconfirmed without additional assessment; the score reflects this game’s rubric, not clinical competency certification.</p><div class="exam-session-actions feedback-next-actions"><button class="btn primary" onclick="restartPatient()">↻ Replay Patient 01 from Start</button><button class="btn" onclick="go(\'patients\')">Choose Patient</button><button class="btn feedback-next-patient" disabled aria-disabled="true" title="Patient 02 is not released yet">Next: Patient 02 → <small>Coming soon</small></button></div></section>';
  const submit=document.querySelector("#diagnosis-submit");if(submit)submit.disabled=true;
@@ -81,7 +81,7 @@ function gold(from=true){s.from=from;s.ret=s.page=="gold"?s.ret:s.page;s.page="g
 
 function restartPatient(){
  if(!confirm("Restart Patient 01? This clears the current history, examination records and diagnosis progress."))return;
- s={page:"clinic",patientId:1,asked:[],find:[],tool:null,ret:"clinic",from:false,walkX:37,walkY:82};
+ s={page:"clinic",patientId:activeCase().id,asked:[],find:[],tool:null,ret:"clinic",from:false,walkX:37,walkY:82};
  save();render();window.scrollTo(0,0);
 }
 function patientSelector(){
