@@ -10,7 +10,7 @@ const K="endoV02";let s=JSON.parse(localStorage.getItem(K)||'null')||{page:"land
    <p class="cinema-desc">Step inside the operatory. Meet your patient, investigate the symptoms, examine real dental anatomy, and build a diagnosis from evidence.</p>
    <div class="cinema-actions">
     <button class="cinema-start" onclick="go('patients')"><span class="cinema-start-icon">▶</span><span><strong>Enter the Clinic</strong><small>BEGIN THE EXPERIENCE</small></span><span class="cinema-arrow">↗</span></button>
-    <button class="cinema-explore" onclick="gold(false)">Explore the science <span>↗</span></button><button class="cinema-explore" onclick="go('patients')">Select Patient <span>↗</span></button>
+    <button class="cinema-explore" onclick="gold(false)">Explore the science <span>↗</span></button>
    </div>
    <div class="cinema-footnote"><span>01 / PATIENT HISTORY</span><i></i><span>02 / CLINICAL EXAM</span><i></i><span>03 / DIAGNOSIS</span></div>
   </section>
