@@ -149,3 +149,11 @@
 .feedback-test.done{color:#c5e8d2;border-color:#668f78;background:#254033}
 .feedback-next{padding:14px;border-left:3px solid #c7a979;background:#243033;font-size:14px;line-height:1.6}
 @media(max-width:600px){.feedback-rows{grid-template-columns:1fr}.clinical-feedback{padding:16px}.feedback-row{padding:13px}}
+
+/* v3.7.1: three clear post-diagnosis actions */
+.feedback-next-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.feedback-next-actions>.btn{width:100%;min-height:64px;white-space:normal;line-height:1.4;padding:14px 12px}
+.feedback-next-patient{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.feedback-next-patient small{font-size:11px;opacity:.8}
+.feedback-next-patient:disabled{opacity:.52;cursor:not-allowed}
+@media(max-width:700px){.feedback-next-actions{grid-template-columns:1fr;gap:10px}.feedback-next-actions>.btn{min-height:55px}}
