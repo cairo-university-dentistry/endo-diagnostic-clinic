@@ -146,6 +146,15 @@ export async function mountExam3D(host,onSelect){
       const centerPoint=bounds.getCenter(new T.Vector3());
       const dims=bounds.getSize(new T.Vector3());
       const minSpan=Math.min(dims.x,dims.z);
+      // Visible occlusal caries cue for the teaching case; decorative, not a new tooth mesh.
+      const lesionMaterial=new T.MeshStandardMaterial({color:0x49301b,roughness:1,transparent:true,opacity:.9,depthWrite:false,side:T.DoubleSide});
+      const lesion=new T.Mesh(new T.SphereGeometry(1,20,12),lesionMaterial);
+      lesion.scale.set(Math.max(.07,dims.x*.18),Math.max(.025,dims.y*.025),Math.max(.07,dims.z*.18));
+      lesion.position.set(centerPoint.x,bounds.min.y+dims.y*.075,centerPoint.z);
+      scene.add(lesion);
+      // Keep the lesion fixed to the same rotation as the anatomical arches.
+      root.attach(lesion);
+
       const position=new T.Vector3();
       tooth.traverse(mesh=>{
         if(!mesh.isMesh||!mesh.geometry?.attributes?.position)return;
