@@ -68,17 +68,31 @@ export async function mountExam3D(host,onSelect){
     tooth.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.baseMaterial=o.material}});
     g.target.add(tooth);teeth.push(tooth);
     if(tooth.userData.fdi===26){
+      // Position stain on the occlusal crown using the tooth's own mesh surface.
+      // The upper crowns point toward negative Y in this anatomical asset.
       tooth.updateWorldMatrix(true,true);
       const bounds=new T.Box3().setFromObject(tooth);
-      const dimensions=bounds.getSize(new T.Vector3());
-      const middle=bounds.getCenter(new T.Vector3());
-      const spot=new T.Mesh(
-        new T.SphereGeometry(Math.min(dimensions.x,dimensions.z)*0.2,20,12),
-        new T.MeshStandardMaterial({color:0x4d2a16,roughness:1})
+      const centerPoint=bounds.getCenter(new T.Vector3());
+      const dims=bounds.getSize(new T.Vector3());
+      const surfaceRay=new T.Raycaster(
+        new T.Vector3(centerPoint.x,bounds.min.y-1,centerPoint.z),
+        new T.Vector3(0,1,0)
       );
-      spot.scale.set(1,0.16,0.8);
-      spot.position.copy(arches.upper.worldToLocal(new T.Vector3(middle.x,bounds.min.y+0.02,middle.z)));
-      arches.upper.add(spot);
+      const surfaces=[];tooth.traverse(o=>{if(o.isMesh)surfaces.push(o)});
+      const intersections=surfaceRay.intersectObjects(surfaces,false);
+      if(intersections.length){
+        const hit=intersections[0];
+        const radius=Math.min(dims.x,dims.z)*.16;
+        const spot=new T.Mesh(
+          new T.SphereGeometry(radius,24,12),
+          new T.MeshStandardMaterial({color:0x50301d,roughness:1})
+        );
+        spot.scale.set(1,.11,.78);
+        const local=tooth.worldToLocal(hit.point.clone());
+        local.y-=.006;
+        spot.position.copy(local);
+        tooth.add(spot);
+      }
     }
    });
   }
