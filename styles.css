@@ -109,3 +109,16 @@
 .patient-reaction-card{align-items:center;gap:20px;min-height:200px}
 .patient-reaction-avatar-3d{flex:0 0 185px;width:185px;height:185px;border-radius:16px}
 @media(max-width:600px){.exam-hybrid #exam-record{min-height:52px;margin:8px 0 22px}.patient-reaction-card{gap:12px;min-height:175px;padding:12px}.patient-reaction-avatar-3d{flex:0 0 43%;width:43%;height:165px}.patient-reaction-line{font-size:13px}}
+
+/* v3.6.3 mobile examination: compact procedure-to-reaction flow */
+@media(max-width:600px){
+ .exam-hybrid .exam-tray{padding:18px 14px}
+ .exam-hybrid .exam-tools-grid{gap:8px}
+ .exam-hybrid .exam-tool{min-height:54px;padding:11px 8px}
+ .exam-hybrid #exam-tool-guide{margin:7px 0 12px;line-height:1.45}
+ .exam-hybrid #exam-record{min-height:48px;margin:4px 0 12px}
+ .exam-hybrid .patient-reaction-card{margin:6px 0 12px;padding:10px;gap:12px;min-height:140px;align-items:center}
+ .exam-hybrid .patient-reaction-avatar-3d{flex:0 0 44%;width:44%;height:148px}
+ .exam-hybrid .patient-reaction-line{font-size:13px;line-height:1.4}
+ .exam-hybrid .patient-reaction-mood{margin-bottom:5px}
+}
