@@ -56,7 +56,7 @@ export async function mountPatientFace(stage,expression="neutral"){
  const mouthInner=ball(head,black,0,-.57,.791,.18,.014,.012);
  const torso=ball(scene,shirt,0,-1.79,-.24,1.35,.95,.7);
  const neck=ball(scene,skin,0,-1.06,.08,.32,.48,.33);
- const config={pain:[-.15,.7,1],uncertain:[.12,.55,.7],concerned:[-.06,.6,.85],tired:[-.07,.45,.65],neutral:[0,.55,.7]}[expression]||[0,.55,.7];
+ const configs={pain:[-.15,.7,1],uncertain:[.12,.55,.7],concerned:[-.06,.6,.85],tired:[-.07,.45,.65],neutral:[0,.55,.7]};let config=configs[expression]||configs.neutral;setEmotion=next=>{expression=next;config=configs[next]||configs.neutral;start=performance.now()};
  brows[0].rotation.z=expression==="pain"?-.28:expression==="uncertain"?.2:-.06;
  brows[1].rotation.z=expression==="pain"?.28:expression==="uncertain"?.12:.06;
  brows[0].position.y=config[1];brows[1].position.y=config[1]+(expression==="uncertain"?.13:0);
@@ -69,7 +69,7 @@ export async function mountPatientFace(stage,expression="neutral"){
  eyes.forEach(e=>e.scale.y=blink?.10:.013);
  const speaking=!reduce&&dt<2.9;mouth.scale.y=speaking?.055+Math.abs(Math.sin(dt*12))*.1:.055;
  mouthInner.scale.y=speaking?.014+Math.abs(Math.sin(dt*12))*.1:.014;
- head.rotation.z=reduce?0:config[0]+Math.sin(dt*.8)*.023;
+ brows[0].position.y+=(config[1]-brows[0].position.y)*.13;brows[1].position.y+=(config[1]-brows[1].position.y)*.13;head.rotation.z=reduce?0:config[0]+Math.sin(dt*.8)*.023;
  head.rotation.y=reduce?0:Math.sin(dt*.65)*.045;
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
  function dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();scene.traverse(o=>{o.geometry?.dispose();o.material?.dispose?.()});renderer.dispose();renderer.domElement.remove();if(current===dispose)current=null}
