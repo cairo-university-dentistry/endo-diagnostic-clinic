@@ -53,7 +53,23 @@ function submitDiagnosis(){
  const score=Math.min(100,(pCorrect?45:0)+(aCorrect?25:0)+Math.min(20,uniqueTests.size*4)+Math.min(10,(s.asked||[]).length*2));
  localStorage.setItem("endoCompletedPatient01","yes");
  const feedback=document.querySelector("#diagnosis-feedback");
- if(feedback)feedback.innerHTML=`<div class="diagnosis-result"><div class="eye">CLINICAL REASONING SCORE</div><h2>${score} / 100</h2><p>45 points: pulpal diagnosis · 25: apical assessment · 20: distinct tests on FDI 26 · 10: history questions.</p><h3>${pCorrect&&aCorrect?"Excellent clinical reasoning!":"Review the evidence"}</h3><p><strong>Pulpal diagnosis:</strong> ${pCorrect?"Correct.":"Review needed."} The fictional case supports symptomatic irreversible pulpitis: deep caries and lingering cold pain indicate an inflamed pulp unlikely to recover. A positive EPT response alone does not establish pulpal health.</p><p><strong>Apical assessment:</strong> ${aCorrect?"Correct.":"Review needed."} Negative percussion and palpation are reassuring, but without radiographic and complete examination data the apical diagnosis cannot be confirmed.</p><p><strong>Teaching note:</strong> This is an illustrative scenario, not a diagnosis of a real patient.</p><div class="exam-session-actions"><button class="btn primary" onclick="restartPatient()">↻ Replay Patient 01 from Start</button><button class="btn" onclick="go('patients')">Choose Patient</button></div></div>`;
+ const allTests=["Visual","Percussion","Palpation","Cold Test","EPT"];
+ const completedTests=allTests.filter(t=>uniqueTests.has(t));
+ const missingTests=allTests.filter(t=>!uniqueTests.has(t));
+ const historyCount=(s.asked||[]).length;
+ const feedbackRows=[
+  {label:"Pulpal reasoning",earned:pCorrect?45:0,max:45,detail:pCorrect?"Correct: deep caries with pain lingering after cold removal supports symptomatic irreversible pulpitis in this fictional case.":"Review: lingering cold pain and deep caries support symptomatic irreversible pulpitis. A positive EPT response alone does not indicate a healthy pulp."},
+  {label:"Apical reasoning",earned:aCorrect?25:0,max:25,detail:aCorrect?"Appropriate caution: without radiographic and complete examination data, the apical status cannot be confirmed.":"Review: negative percussion and palpation alone do not establish a definitive apical diagnosis. Additional assessment is required."},
+  {label:"Clinical examination",earned:Math.min(20,uniqueTests.size*4),max:20,detail:completedTests.length?"Recorded on FDI 26: "+completedTests.join(", ")+".":"No examination tests recorded on FDI 26."},
+  {label:"Patient history",earned:Math.min(10,historyCount*2),max:10,detail:historyCount+" history questions explored."}
+ ];
+ const safe=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+ const details=feedbackRows.map(row=>'<article class="feedback-row"><div class="feedback-row-head"><strong>'+safe(row.label)+'</strong><span>'+row.earned+' / '+row.max+'</span></div><div class="feedback-meter"><i style="width:'+(100*row.earned/row.max)+'%"></i></div><p>'+safe(row.detail)+'</p></article>').join("");
+ const checklist=allTests.map(t=>'<span class="feedback-test '+(uniqueTests.has(t)?"done":"pending")+'">'+(uniqueTests.has(t)?"✓ ":"○ ")+safe(t)+'</span>').join("");
+ const recommendation=missingTests.length?'Consider completing '+missingTests.join(", ")+' on FDI 26 to broaden the evidence.':'All five available examination tools were used on FDI 26.';
+ const result={score,pulp,apical,completedTests,missingTests,historyCount,completedAt:new Date().toISOString()};
+ localStorage.setItem("endoPatient01Feedback",JSON.stringify(result));
+ if(feedback)feedback.innerHTML='<section class="diagnosis-result clinical-feedback"><div class="eye">CASE 001 · CLINICAL FEEDBACK</div><h2>'+score+' / 100</h2><p class="feedback-verdict">'+(pCorrect&&aCorrect?"Both diagnostic assessments align with the case evidence.":"Review the diagnostic reasoning below.")+'</p><div class="feedback-rows">'+details+'</div><h3>Examination checklist · FDI 26</h3><div class="feedback-tests">'+checklist+'</div><p class="feedback-next">'+safe(recommendation)+'</p><p class="exam-disclaimer">Educational simulation only. The apical status remains unconfirmed without additional assessment; the score reflects this game’s rubric, not clinical competency certification.</p><div class="exam-session-actions"><button class="btn primary" onclick="restartPatient()">↻ Replay Patient 01 from Start</button><button class="btn" onclick="go(\'patients\')">Stage Map →</button></div></section>';
  const submit=document.querySelector("#diagnosis-submit");if(submit)submit.disabled=true;
  document.querySelectorAll('input[name="pulp-dx"],input[name="apical-dx"]').forEach(el=>el.disabled=true);
 }
