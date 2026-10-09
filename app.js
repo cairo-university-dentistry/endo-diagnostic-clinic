@@ -48,8 +48,11 @@ function submitDiagnosis(){
  const apical=document.querySelector('input[name="apical-dx"]:checked')?.value;
  if(!pulp||!apical){toast("Choose both assessments before submitting.");return}
  const pCorrect=pulp==="irreversible",aCorrect=apical==="unknown";
+ const relevant=(s.find||[]).filter(x=>x.includes("FDI 26 ·"));
+ const uniqueTests=new Set(relevant.map(x=>x.split(" · ")[0]));
+ const score=Math.min(100,(pCorrect?45:0)+(aCorrect?25:0)+Math.min(20,uniqueTests.size*4)+Math.min(10,(s.asked||[]).length*2));
  const feedback=document.querySelector("#diagnosis-feedback");
- if(feedback)feedback.innerHTML=`<div class="diagnosis-result"><h3>${pCorrect&&aCorrect?"Excellent clinical reasoning!":"Review the evidence"}</h3><p><strong>Pulpal diagnosis:</strong> ${pCorrect?"Correct.":"Review needed."} The fictional case supports symptomatic irreversible pulpitis: deep caries and lingering cold pain indicate an inflamed pulp unlikely to recover. A positive EPT response alone does not establish pulpal health.</p><p><strong>Apical assessment:</strong> ${aCorrect?"Correct.":"Review needed."} Negative percussion and palpation are reassuring, but without radiographic and complete examination data the apical diagnosis cannot be confirmed.</p><p><strong>Teaching note:</strong> This is an illustrative scenario, not a diagnosis of a real patient.</p></div>`;
+ if(feedback)feedback.innerHTML=`<div class="diagnosis-result"><div class="eye">CLINICAL REASONING SCORE</div><h2>${score} / 100</h2><p>45 points: pulpal diagnosis · 25: apical assessment · 20: distinct tests on FDI 26 · 10: history questions.</p><h3>${pCorrect&&aCorrect?"Excellent clinical reasoning!":"Review the evidence"}</h3><p><strong>Pulpal diagnosis:</strong> ${pCorrect?"Correct.":"Review needed."} The fictional case supports symptomatic irreversible pulpitis: deep caries and lingering cold pain indicate an inflamed pulp unlikely to recover. A positive EPT response alone does not establish pulpal health.</p><p><strong>Apical assessment:</strong> ${aCorrect?"Correct.":"Review needed."} Negative percussion and palpation are reassuring, but without radiographic and complete examination data the apical diagnosis cannot be confirmed.</p><p><strong>Teaching note:</strong> This is an illustrative scenario, not a diagnosis of a real patient.</p></div>`;
  const submit=document.querySelector("#diagnosis-submit");if(submit)submit.disabled=true;
  document.querySelectorAll('input[name="pulp-dx"],input[name="apical-dx"]').forEach(el=>el.disabled=true);
 }
