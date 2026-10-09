@@ -105,7 +105,7 @@ export async function mountExam3D(host,onSelect){
   }
  }
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
- function dispose(){if(dead)return;dead=true;cancelAnimationFrame(raf);ro.disconnect();renderer.dispose();renderer.domElement.remove();status.remove();if(activeInstrument){activeInstrument=null}instrument.traverse(o=>{if(o.geometry)o.geometry.dispose()});arches.upper.traverse(o=>{if(o===lesion){o.geometry.dispose();o.material.dispose()}});teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.material!==o.userData.baseMaterial)o.material.dispose()}));if(activeDispose===dispose)activeDispose=null}
+ function dispose(){if(dead)return;dead=true;cancelAnimationFrame(raf);ro.disconnect();renderer.dispose();renderer.domElement.remove();status.remove();if(activeInstrument){activeInstrument=null}instrument.traverse(o=>{if(o.geometry)o.geometry.dispose()});arches.upper.traverse(o=>{if(o.userData?.cariesOverlay){o.geometry.dispose();o.material.dispose()}});teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.material!==o.userData.baseMaterial)o.material.dispose()}));if(activeDispose===dispose)activeDispose=null}
  activeDispose=dispose;frame();
  try{
   const gltf=await new GLTFLoader().loadAsync("./permanent-dentition-mobile.glb");
@@ -151,6 +151,7 @@ export async function mountExam3D(host,onSelect){
       const lesion=new T.Mesh(new T.SphereGeometry(1,20,12),lesionMaterial);
       lesion.scale.set(Math.max(.07,dims.x*.18),Math.max(.025,dims.y*.025),Math.max(.07,dims.z*.18));
       lesion.position.set(centerPoint.x,bounds.min.y+dims.y*.075,centerPoint.z);
+      lesion.userData.cariesOverlay=true;
       scene.add(lesion);
       // Keep the lesion fixed to the same rotation as the anatomical arches.
       arches.upper.attach(lesion);
