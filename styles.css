@@ -131,3 +131,21 @@
 .exam-reaction-close{position:absolute;right:9px;top:7px;border:0;background:transparent;color:#e5dfd2;font-size:28px;line-height:1;cursor:pointer;padding:5px 9px}
 @media(max-width:600px){.exam-reaction-float{bottom:calc(78px + env(safe-area-inset-bottom,0px));padding:12px 34px 12px 10px;gap:11px;min-height:140px}.exam-reaction-float .patient-reaction-avatar-3d{flex:0 0 112px;width:112px;height:128px}.exam-reaction-float .patient-reaction-line{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.exam-reaction-float{transition:none}}
+
+/* v3.7 clinical feedback dashboard */
+.clinical-feedback{margin-top:26px;padding:clamp(18px,4vw,32px);border:1px solid rgba(204,176,122,.35);border-radius:20px;background:linear-gradient(145deg,#1b292b,#141b20)}
+.clinical-feedback h2{font-size:clamp(42px,8vw,76px);line-height:1.1;margin:10px 0;color:#e5c88e}
+.clinical-feedback h3{font-size:18px;margin:24px 0 12px}
+.feedback-verdict{color:#e6e5dd;font-size:16px}
+.feedback-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0}
+.feedback-row{padding:16px;border:1px solid #3b4b4d;border-radius:13px;background:#172225}
+.feedback-row-head{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#e9e5dc}
+.feedback-row-head span{white-space:nowrap;color:#e2c38c}
+.feedback-meter{height:7px;margin:13px 0;border-radius:20px;overflow:hidden;background:#39474a}
+.feedback-meter i{display:block;height:100%;border-radius:20px;background:#d2b27d}
+.feedback-row p{font-size:13px;line-height:1.6;color:#bfcacc;margin:0}
+.feedback-tests{display:flex;flex-wrap:wrap;gap:8px}
+.feedback-test{padding:9px 12px;border-radius:100px;border:1px solid #4b595c;font-size:12px;color:#c7d0d0}
+.feedback-test.done{color:#c5e8d2;border-color:#668f78;background:#254033}
+.feedback-next{padding:14px;border-left:3px solid #c7a979;background:#243033;font-size:14px;line-height:1.6}
+@media(max-width:600px){.feedback-rows{grid-template-columns:1fr}.clinical-feedback{padding:16px}.feedback-row{padding:13px}}
