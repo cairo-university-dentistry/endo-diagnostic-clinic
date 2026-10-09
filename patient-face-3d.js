@@ -26,7 +26,7 @@ export async function mountPatientFace(stage,expression="neutral"){
  if(request!==requestId||!stage.isConnected)return;
  if(current)current();
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(30,1,.1,30);
- camera.position.set(0,.08,7.8);camera.lookAt(0,.05,0);
+ camera.position.set(0,.12,5.6);camera.lookAt(0,.05,0);
  const renderer=new T.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"});
  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputColorSpace=T.SRGBColorSpace;
  renderer.domElement.className="patient-3d-canvas";stage.prepend(renderer.domElement);
