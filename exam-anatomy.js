@@ -38,16 +38,32 @@ export async function mountExam3D(host,onSelect){
  cylinder(percussionTool,.065,.065,.19,dark,.2);
  const percussionEnd=new T.Mesh(new T.SphereGeometry(.042,12,10),steel);
  percussionEnd.position.y=-.41;percussionTool.add(percussionEnd);
+ const visualTool=new T.Group();instrument.add(visualTool);
+ cylinder(visualTool,.025,.027,.65,steel,.06);
+ const mirrorStem=cylinder(visualTool,.017,.017,.22,steel,-.37);
+ mirrorStem.rotation.z=.38;
+ const mirror=new T.Mesh(new T.CylinderGeometry(.14,.14,.018,28),new T.MeshStandardMaterial({color:0xc6e9f4,metalness:.72,roughness:.12,side:T.DoubleSide}));
+ mirror.rotation.x=Math.PI/2;mirror.position.set(-.08,-.51,0);visualTool.add(mirror);
+ const palpationTool=new T.Group();instrument.add(palpationTool);
+ const glove=new T.MeshStandardMaterial({color:0x6eb6d2,roughness:.85});
+ const palm=new T.Mesh(new T.SphereGeometry(.16,16,12),glove);palm.scale.set(1,.65,.6);palm.position.y=.14;palpationTool.add(palm);
+ for(let i=0;i<2;i++){const finger=cylinder(palpationTool,.038,.028,.35,glove,-.11);finger.position.x=(i-.5)*.085}
+ const eptTool=new T.Group();instrument.add(eptTool);
+ const eptBody=cylinder(eptTool,.095,.085,.48,dark,.12);
+ cylinder(eptTool,.032,.032,.27,steel,-.24);
+ const probe=cylinder(eptTool,.012,.012,.16,steel,-.45);
+ const eptIndicator=new T.Mesh(new T.BoxGeometry(.1,.09,.015),new T.MeshBasicMaterial({color:0x65d3a4}));
+ eptIndicator.position.set(0,.2,.09);eptTool.add(eptIndicator);
+ const toolGroups={"Cold Test":coldTool,"Percussion":percussionTool,"Visual":visualTool,"Palpation":palpationTool,"EPT":eptTool};
  let motion=null;
  activeInstrument=(tool,fdi)=>{
-  if(tool!=="Cold Test"&&tool!=="Percussion")return;
+  if(!toolGroups[tool])return;
   const tooth=teeth.find(t=>t.userData.fdi===fdi&&t.parent.visible);
   if(!tooth||dead)return;
   tooth.updateWorldMatrix(true,true);
   const bounds=new T.Box3().setFromObject(tooth);
   const target=bounds.getCenter(new T.Vector3());
-  coldTool.visible=tool==="Cold Test";
-  percussionTool.visible=tool==="Percussion";
+  Object.entries(toolGroups).forEach(([name,group])=>{group.visible=name===tool});
   instrument.visible=true;
   motion={target,start:performance.now(),tool};
  };
@@ -73,7 +89,7 @@ export async function mountExam3D(host,onSelect){
    const retreat=progress>1.05?Math.min(1,(progress-1.05)/.4):0;
    const distance=.9*(1-approach+retreat);
    instrument.position.copy(motion.target).add(new T.Vector3(.38+distance,.55+distance,.4));
-   instrument.rotation.z=motion.tool==="Cold Test"?-.6:(-.65+(progress>.65&&progress<1.05?Math.sin((progress-.65)*48)*.2:0));
+   instrument.rotation.z=motion.tool==="Cold Test"?-.6:motion.tool==="Percussion"?(-.65+(progress>.65&&progress<1.05?Math.sin((progress-.65)*48)*.2:0)):motion.tool==="Visual"?-.95:motion.tool==="Palpation"?-.35:-.55;
   }
  }
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
