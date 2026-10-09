@@ -81,7 +81,8 @@ function examRunTest(){
  const response=demoResponse(examSelected,s.tool);
  if(!response)return;
  const result=document.querySelector("#exam-patient-response");
- if(result)result.textContent=response;
+ if(result){result.textContent=response;result.classList.remove("exam-response-animate");void result.offsetWidth;result.classList.add("exam-response-animate");}
+ const stage=document.querySelector("#exam-3d-stage");if(stage){stage.dataset.activeTest=s.tool;stage.classList.remove("exam-testing");void stage.offsetWidth;stage.classList.add("exam-testing");setTimeout(()=>stage.classList.remove("exam-testing"),1200)}
  const item=s.tool+" · FDI "+examSelected+" · "+response;
  if(!s.find.includes(item))s.find.push(item);
  save();const notes=document.querySelector("#exam-notes");if(notes)notes.textContent=s.find.join(" · ");
