@@ -12,7 +12,7 @@ export async function mountPatientFace(stage,expression="neutral"){
  if(!stage.isConnected||request!==requestId)return;
  // Prefer a production GLB avatar with facial blendshapes when a licensed asset is configured.
  // Until then retain the procedural prototype rather than claim it is cinematic.
- const modelUrl=window.ENDO_PATIENT_MODEL_URL;
+ const modelUrl="./assets/patient/scene.gltf";
  if(modelUrl){
    try{
      const {GLTFLoader}=await import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js");
@@ -76,6 +76,7 @@ export async function mountPatientFace(stage,expression="neutral"){
  current=dispose;stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
 }
 
+function modelUrlIsLegacy(){return false}
 async function mountRiggedPortrait(stage,T,gltf,expression){
  if(current)current();
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.1,100);
@@ -92,7 +93,7 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  avatar.traverse(part=>{
   if(!part.isMesh)return;
   const mid=new T.Box3().setFromObject(part).getCenter(new T.Vector3());
-  if(/hand|finger|wrist|arm/i.test(part.name)||Math.abs(mid.x-origin.x)>span.x*.29)part.visible=false;
+  if(modelUrlIsLegacy()&&(/hand|finger|wrist|arm/i.test(part.name)||Math.abs(mid.x-origin.x)>span.x*.29))part.visible=false;
  });
  const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
  // Portrait crop: focus on upper torso, not full-body bounds.
