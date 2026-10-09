@@ -68,26 +68,44 @@ export async function mountExam3D(host,onSelect){
     tooth.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.baseMaterial=o.material}});
     g.target.add(tooth);teeth.push(tooth);
     if(tooth.userData.fdi===26){
-      // Small opaque stains placed directly on occlusal geometry.
-      tooth.updateWorldMatrix(true,true);
+      // Non-destructive per-vertex staining of the existing anatomical surface.
+      tooth.updateMatrixWorld(true);
       const bounds=new T.Box3().setFromObject(tooth);
       const centerPoint=bounds.getCenter(new T.Vector3());
       const dims=bounds.getSize(new T.Vector3());
-      const meshes=[];tooth.traverse(o=>{if(o.isMesh)meshes.push(o)});
-      const stainMaterial=new T.MeshStandardMaterial({color:0x56321d,roughness:1,side:T.DoubleSide});
-      const offsets=[[0,0],[.09,.03],[-.07,.06],[.03,-.08],[-.08,-.04]];
-      const radius=Math.min(dims.x,dims.z)*.045;
-      offsets.forEach(([ox,oz],index)=>{
-        const origin=new T.Vector3(centerPoint.x+ox*dims.x,bounds.min.y-1,centerPoint.z+oz*dims.z);
-        const ray=new T.Raycaster(origin,new T.Vector3(0,1,0));
-        const hit=ray.intersectObjects(meshes,false)[0];
-        if(!hit)return;
-        const normal=hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
-        const stain=new T.Mesh(new T.CircleGeometry(radius*(index===0?1.5:1),14),stainMaterial);
-        stain.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),normal);
-        const point=hit.point.clone().addScaledVector(normal,.012);
-        stain.position.copy(tooth.worldToLocal(point));
-        tooth.add(stain);
+      const minSpan=Math.min(dims.x,dims.z);
+      const position=new T.Vector3();
+      tooth.traverse(mesh=>{
+        if(!mesh.isMesh||!mesh.geometry?.attributes?.position)return;
+        mesh.geometry=mesh.geometry.clone();
+        const vertices=mesh.geometry.attributes.position;
+        const colors=new Float32Array(vertices.count*3);
+        let changed=false;
+        for(let v=0;v<vertices.count;v++){
+          position.fromBufferAttribute(vertices,v).applyMatrix4(mesh.matrixWorld);
+          const x=(position.x-centerPoint.x)/minSpan;
+          const z=(position.z-centerPoint.z)/minSpan;
+          const depth=(position.y-bounds.min.y)/Math.max(dims.y,.001);
+          const fissure=Math.abs(z-.13*Math.sin(x*12))*.9+Math.abs(x)*.25;
+          const branch=Math.abs(x+.10*Math.sin(z*15))*.9+Math.abs(z)*.45;
+          const irregular=.018*Math.sin(x*43+z*27)+.012*Math.cos(z*51-x*17);
+          const track=Math.min(fissure,branch);
+          const edge=T.MathUtils.smoothstep(track+irregular,.035,.17);
+          const crown=1-T.MathUtils.smoothstep(depth,.13,.26);
+          const stain=Math.max(0,Math.min(1,(1-edge)*crown*.82));
+          const warmth=.74*stain;
+          colors[v*3]=1-.67*stain;
+          colors[v*3+1]=1-.83*warmth;
+          colors[v*3+2]=1-.9*stain;
+          if(stain>.03)changed=true;
+        }
+        if(changed){
+          mesh.geometry.setAttribute("color",new T.BufferAttribute(colors,3));
+          mesh.material=mesh.material.clone();
+          mesh.material.vertexColors=true;
+          mesh.material.needsUpdate=true;
+          mesh.userData.baseMaterial=mesh.material;
+        }
       });
     }
    });
