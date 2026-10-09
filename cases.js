@@ -1,6 +1,6 @@
 /* ENDO v3.8 — data-driven clinical case registry.
    Case 001 is preserved verbatim; additional cases must be clinically reviewed before release. */
-export const cases={
+const cases={
  1:{
   id:1,code:"CASE 001",label:"Patient 01",target:26,
   history:[
@@ -26,7 +26,9 @@ export const cases={
   }
  }
 };
-export const releasedCaseIds=[1];
-export function getCase(id=1){return cases[id]||null}
-export function completionKey(id){return "endoCompletedPatient"+String(id).padStart(2,"0")}
-export function feedbackKey(id){return "endoPatient"+String(id).padStart(2,"0")+"Feedback"}
+const releasedCaseIds=[1];
+function getCase(id=1){return cases[id]||null}
+function completionKey(id){return "endoCompletedPatient"+String(id).padStart(2,"0")}
+function feedbackKey(id){return "endoPatient"+String(id).padStart(2,"0")+"Feedback"}
+
+window.ENDO_CASES={getCase,releasedCaseIds,completionKey,feedbackKey};
