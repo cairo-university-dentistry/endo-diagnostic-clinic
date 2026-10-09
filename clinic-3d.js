@@ -116,13 +116,13 @@ export async function mountClinic3D(stage,getPosition){
  g.position.set(px,0,pz);scene.add(g);return g;
  }
  const doctor=character(materials.teal,-3.4,2.4);
- const patient=character(materials.red,-3.45,2.95);
- const seatedPosition=new T.Vector3(-3.45,0,2.95);
+ const patient=character(materials.red,-3.45,.65);
+ const seatedPosition=new T.Vector3(-3.45,0,.65);
  const treatmentPosition=new T.Vector3(2.1,.78,.55);
  patient.position.copy(seatedPosition);
  patient.rotation.y=Math.PI;
  let patientJourney=null;
- const journeyPoints=[new T.Vector3(-3.45,0,2.95),new T.Vector3(-2.4,0,3.5),new T.Vector3(.85,0,3.5),new T.Vector3(3.65,0,3.5),new T.Vector3(3.65,0,.35),new T.Vector3(3.15,0,-.45),treatmentPosition];
+ const journeyPoints=[new T.Vector3(-3.45,0,2.95),new T.Vector3(-2.15,0,.65),new T.Vector3(-2.15,0,3.5),new T.Vector3(.85,0,3.5),new T.Vector3(3.65,0,3.5),new T.Vector3(3.65,0,.35),new T.Vector3(3.15,0,-.45),treatmentPosition];
  const beginJourney=()=>{patientJourney={start:performance.now()};focusPatient=false;camera.zoom=1;camera.position.set(13,17,19);focusTarget.set(0,0,0);camera.lookAt(focusTarget);camera.updateProjectionMatrix()};
  stage.addEventListener("patient-to-chair",beginJourney);
  // Temporary complete-body patient. The previous half-body GLB had detached hands.
@@ -169,7 +169,7 @@ export async function mountClinic3D(stage,getPosition){
  let focusPatient=false;let focusStart=0;const focusTarget=new T.Vector3(0,0,0);stage.addEventListener("patient-focus",()=>{focusPatient=true;focusStart=performance.now()});
  // patient ring
  const ring=new T.Mesh(new T.RingGeometry(.44,.53,32),new T.MeshBasicMaterial({color:0xc8ad7c,side:T.DoubleSide}));
- ring.rotation.x=-Math.PI/2;ring.position.set(-3.45,.025,2.95);scene.add(ring);
+ ring.rotation.x=-Math.PI/2;ring.position.set(-3.45,.025,.65);scene.add(ring);
  let disposed=false,raf=0,last=0;
  function suppressIdle(){return patient.position.x>0}
  function size(){if(disposed)return;const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);const aspect=w/h;camera.left=-7.4*aspect;camera.right=7.4*aspect;camera.top=7.4;camera.bottom=-7.4;camera.updateProjectionMatrix()}
@@ -188,7 +188,7 @@ export async function mountClinic3D(stage,getPosition){
  ring.position.x=patient.position.x;ring.position.z=patient.position.z;
  if(elapsed>=(journeyPoints.length-1)*1100){patientJourney=null;patient.position.copy(treatmentPosition);patient.rotation.y=0;stage.dispatchEvent(new Event("patient-seated"))}
  }else if(!suppressIdle()){patient.position.y=seatedPosition.y+Math.sin(t*.0017)*.012}
- ring.material.opacity=.7;if(focusPatient){camera.position.lerp(new T.Vector3(6,7,9),.09);focusTarget.lerp(new T.Vector3(-3.45,1,2.95),.09);camera.lookAt(focusTarget);const u=Math.min(1,(t-focusStart)/1700);camera.zoom=1+2.7*u*u*(3-2*u);camera.updateProjectionMatrix()}
+ ring.material.opacity=.7;if(focusPatient){camera.position.lerp(new T.Vector3(6,7,9),.09);focusTarget.lerp(new T.Vector3(-3.45,1,.65),.09);camera.lookAt(focusTarget);const u=Math.min(1,(t-focusStart)/1700);camera.zoom=1+2.7*u*u*(3-2*u);camera.updateProjectionMatrix()}
  renderer.render(scene,camera);raf=requestAnimationFrame(frame)}
  function dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);ro.disconnect();scene.traverse(o=>{o.geometry?.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});renderer.dispose();renderer.domElement.remove();if(active?.dispose===dispose)active=null}
  active={dispose};stage.classList.add("three-ready");raf=requestAnimationFrame(frame);
