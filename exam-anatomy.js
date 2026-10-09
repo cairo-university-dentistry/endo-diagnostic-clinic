@@ -46,8 +46,19 @@ export async function mountExam3D(host,onSelect){
  mirror.rotation.x=Math.PI/2;mirror.position.set(-.08,-.51,0);visualTool.add(mirror);
  const palpationTool=new T.Group();instrument.add(palpationTool);
  const glove=new T.MeshStandardMaterial({color:0x6eb6d2,roughness:.85});
- const palm=new T.Mesh(new T.SphereGeometry(.16,16,12),glove);palm.scale.set(1,.65,.6);palm.position.y=.14;palpationTool.add(palm);
- for(let i=0;i<2;i++){const finger=cylinder(palpationTool,.038,.028,.35,glove,-.11);finger.position.x=(i-.5)*.085}
+ // Anatomical approximation of a gloved hand: palm, thumb and two rounded fingertips.
+ const palm=new T.Mesh(new T.SphereGeometry(.22,24,18),glove);
+ palm.scale.set(.94,1.35,.52);palm.position.set(0,.32,0);palpationTool.add(palm);
+ for(let i=0;i<2;i++){
+  const digit=new T.Group();palpationTool.add(digit);
+  digit.position.set((i-.5)*.18,.06,0);
+  const shaft=cylinder(digit,.061,.049,.32,glove,-.12);
+  const tip=new T.Mesh(new T.SphereGeometry(.055,16,12),glove);
+  tip.scale.set(1,.7,1);tip.position.y=-.29;digit.add(tip);
+ }
+ const thumb=cylinder(palpationTool,.074,.054,.27,glove,.12);
+ thumb.rotation.z=-.8;thumb.position.x=-.22;
+ const cuff=cylinder(palpationTool,.17,.18,.2,glove,.65);
  const eptTool=new T.Group();instrument.add(eptTool);
  const eptBody=cylinder(eptTool,.095,.085,.48,dark,.12);
  cylinder(eptTool,.032,.032,.27,steel,-.24);
@@ -65,6 +76,7 @@ export async function mountExam3D(host,onSelect){
   const target=bounds.getCenter(new T.Vector3());
   Object.entries(toolGroups).forEach(([name,group])=>{group.visible=name===tool});
   instrument.visible=true;
+  if(tool==="Palpation")target.add(new T.Vector3(0,fdi<30?-.36:.36,.36));
   motion={target,start:performance.now(),tool};
  };
  function clearPick(){selected=null;teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.userData.baseMaterial)o.material=o.userData.baseMaterial}));onSelect?.(null,null)}
@@ -88,7 +100,7 @@ export async function mountExam3D(host,onSelect){
    const approach=Math.min(1,progress/.65);
    const retreat=progress>1.05?Math.min(1,(progress-1.05)/.4):0;
    const distance=.9*(1-approach+retreat);
-   instrument.position.copy(motion.target).add(new T.Vector3(.38+distance,.55+distance,.4));
+   instrument.position.copy(motion.target).add(motion.tool==="Palpation"?new T.Vector3(.12+distance*.5,.24+distance*.4,.08+distance):new T.Vector3(.38+distance,.55+distance,.4));
    instrument.rotation.z=motion.tool==="Cold Test"?-.6:motion.tool==="Percussion"?(-.65+(progress>.65&&progress<1.05?Math.sin((progress-.65)*48)*.2:0)):motion.tool==="Visual"?-.95:motion.tool==="Palpation"?-.35:-.55;
   }
  }
