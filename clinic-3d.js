@@ -117,6 +117,29 @@ export async function mountClinic3D(stage,getPosition){
  }
  const doctor=character(materials.teal,-3.4,2.4);
  const patient=character(materials.red,-3.45,.65);
+ // Optional imported patient asset: retain procedural patient if the files are not uploaded yet.
+ // Rig and materials are preserved; movement is controlled by the existing patient group.
+ const patientFallback=[...patient.children];
+ import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js").then(({GLTFLoader})=>{
+  if(!stage.isConnected)return;
+  new GLTFLoader().load("./assets/patient/scene.gltf",gltf=>{
+   if(!stage.isConnected)return;
+   const model=gltf.scene;
+   const bounds=new T.Box3().setFromObject(model);
+   const size=bounds.getSize(new T.Vector3());
+   if(!size.y||!Number.isFinite(size.y))return;
+   model.scale.multiplyScalar(1.72/size.y);
+   model.updateMatrixWorld(true);
+   const aligned=new T.Box3().setFromObject(model);
+   const center=aligned.getCenter(new T.Vector3());
+   model.position.x-=center.x;
+   model.position.z-=center.z;
+   model.position.y-=aligned.min.y;
+   patientFallback.forEach(o=>o.visible=false);
+   patient.add(model);
+   console.info("ENDO: imported rigged patient preview loaded");
+  },undefined,()=>console.info("ENDO: using original patient until preview assets are uploaded"));
+ }).catch(()=>{});
  const seatedPosition=new T.Vector3(-3.45,0,.65);
  const treatmentPosition=new T.Vector3(2.1,.78,.55);
  patient.position.copy(seatedPosition);
