@@ -76,7 +76,6 @@ export async function mountPatientFace(stage,expression="neutral"){
  current=dispose;stage.classList.add("patient-three-ready");raf=requestAnimationFrame(frame);
 }
 
-function modelUrlIsLegacy(){return false}
 async function mountRiggedPortrait(stage,T,gltf,expression){
  if(current)current();
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.1,100);
@@ -93,13 +92,13 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  avatar.traverse(part=>{
   if(!part.isMesh)return;
   const mid=new T.Box3().setFromObject(part).getCenter(new T.Vector3());
-  if(modelUrlIsLegacy()&&(/hand|finger|wrist|arm/i.test(part.name)||Math.abs(mid.x-origin.x)>span.x*.29))part.visible=false;
+  if(/hand|finger|wrist|arm/i.test(part.name))part.visible=false;
  });
  const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
  // Portrait crop: focus on upper torso, not full-body bounds.
  const focusY=box.max.y-size.y*.13;
- const portraitHeight=Math.max(size.y*.28,size.x*.4);
- const dist=portraitHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*.95;
+ const portraitHeight=Math.max(size.y*.33,size.x*.45);
+ const dist=portraitHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.2;
  camera.position.set(center.x,focusY,center.z+dist);
  camera.lookAt(center.x,focusY,center.z);
  const meshes=[],headBones=[];
