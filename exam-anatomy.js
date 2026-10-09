@@ -68,31 +68,27 @@ export async function mountExam3D(host,onSelect){
     tooth.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.baseMaterial=o.material}});
     g.target.add(tooth);teeth.push(tooth);
     if(tooth.userData.fdi===26){
-      // Position stain on the occlusal crown using the tooth's own mesh surface.
-      // The upper crowns point toward negative Y in this anatomical asset.
+      // Small opaque stains placed directly on occlusal geometry.
       tooth.updateWorldMatrix(true,true);
       const bounds=new T.Box3().setFromObject(tooth);
       const centerPoint=bounds.getCenter(new T.Vector3());
       const dims=bounds.getSize(new T.Vector3());
-      const surfaceRay=new T.Raycaster(
-        new T.Vector3(centerPoint.x,bounds.min.y-1,centerPoint.z),
-        new T.Vector3(0,1,0)
-      );
-      const surfaces=[];tooth.traverse(o=>{if(o.isMesh)surfaces.push(o)});
-      const intersections=surfaceRay.intersectObjects(surfaces,false);
-      if(intersections.length){
-        const hit=intersections[0];
-        const radius=Math.min(dims.x,dims.z)*.16;
-        const spot=new T.Mesh(
-          new T.SphereGeometry(radius,24,12),
-          new T.MeshStandardMaterial({color:0x50301d,roughness:1})
-        );
-        spot.scale.set(1,.11,.78);
-        const local=tooth.worldToLocal(hit.point.clone());
-        local.y-=.006;
-        spot.position.copy(local);
-        tooth.add(spot);
-      }
+      const meshes=[];tooth.traverse(o=>{if(o.isMesh)meshes.push(o)});
+      const stainMaterial=new T.MeshStandardMaterial({color:0x56321d,roughness:1,side:T.DoubleSide});
+      const offsets=[[0,0],[.09,.03],[-.07,.06],[.03,-.08],[-.08,-.04]];
+      const radius=Math.min(dims.x,dims.z)*.045;
+      offsets.forEach(([ox,oz],index)=>{
+        const origin=new T.Vector3(centerPoint.x+ox*dims.x,bounds.min.y-1,centerPoint.z+oz*dims.z);
+        const ray=new T.Raycaster(origin,new T.Vector3(0,1,0));
+        const hit=ray.intersectObjects(meshes,false)[0];
+        if(!hit)return;
+        const normal=hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
+        const stain=new T.Mesh(new T.CircleGeometry(radius*(index===0?1.5:1),14),stainMaterial);
+        stain.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),normal);
+        const point=hit.point.clone().addScaledVector(normal,.012);
+        stain.position.copy(tooth.worldToLocal(point));
+        tooth.add(stain);
+      });
     }
    });
   }
