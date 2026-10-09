@@ -98,3 +98,8 @@
 .patient-reaction-pain .patient-reaction-mood{color:#ffb5a0}
 @keyframes patientReactionEnter{from{opacity:.5;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.patient-reaction-card{padding:13px 12px;gap:10px}.patient-reaction-line{font-size:13px}.patient-reaction-avatar{width:32px;height:32px;flex-basis:32px}}
+
+.patient-reaction-avatar-3d{position:relative;flex:0 0 86px;width:86px;height:100px;overflow:hidden;border-radius:12px;background:#26383c}
+.patient-reaction-avatar-3d canvas{display:block;width:100%;height:100%}
+.patient-reaction-card>div:last-child{min-width:0;flex:1}
+@media(max-width:600px){.patient-reaction-avatar-3d{flex-basis:72px;width:72px;height:90px}}
