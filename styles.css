@@ -43,3 +43,16 @@
 
 /* Diagnosis Challenge */
 .diagnosis-challenge{max-width:950px;margin:auto}.diagnosis-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0 28px}.diagnosis-options label{display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid #40545b;border-radius:12px;padding:16px;background:#18272c;color:#f2eee6}.diagnosis-options label:has(input:checked){border-color:#d6b57c;background:#34403b}.diagnosis-options input{accent-color:#d6b57c}.diagnosis-result{margin:22px 0;padding:20px;border:1px solid #b99d73;border-radius:16px;background:#19292a;color:#f3ece0}.diagnosis-result p{line-height:1.7}.diagnosis-challenge #diagnosis-evidence{white-space:pre-wrap;line-height:1.7;margin:16px 0 22px}.diagnosis-challenge #diagnosis-feedback:not(:empty){margin:14px 0}@media(max-width:680px){.diagnosis-options{grid-template-columns:1fr}}
+
+/* v3.2 examination feedback: visual pulse, cold flash, patient response */
+.exam-3d-stage{position:relative;overflow:hidden}
+.exam-3d-stage.exam-testing::after{content:"EXAMINATION IN PROGRESS";position:absolute;inset:auto 12px 14px;display:flex;align-items:center;justify-content:center;min-height:42px;border:1px solid #c4a97d;border-radius:12px;background:rgba(15,29,33,.87);color:#f5e9d1;font-size:12px;letter-spacing:.13em;pointer-events:none;animation:exam-flash 1.2s ease-out both}
+.exam-3d-stage.exam-testing[data-active-test="Cold Test"]::after{content:"❄  COLD STIMULUS APPLIED";border-color:#8ec9ed;color:#d5f2ff}
+.exam-3d-stage.exam-testing[data-active-test="EPT"]::after{content:"ϟ  ELECTRIC PULP TEST";border-color:#dfc487}
+.exam-3d-stage.exam-testing[data-active-test="Percussion"]::after{content:"↘  PERCUSSION TEST"}
+.exam-3d-stage.exam-testing[data-active-test="Palpation"]::after{content:"✋  PALPATION TEST"}
+.exam-3d-stage.exam-testing[data-active-test="Visual"]::after{content:"◉  VISUAL EXAMINATION"}
+.exam-response-animate{animation:exam-response-in .5s ease-out}
+@keyframes exam-flash{0%{opacity:0;transform:translateY(12px)}18%{opacity:1;transform:translateY(0)}75%{opacity:1}100%{opacity:0}}
+@keyframes exam-response-in{0%{opacity:.3;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.exam-3d-stage.exam-testing::after,.exam-response-animate{animation:none}}
