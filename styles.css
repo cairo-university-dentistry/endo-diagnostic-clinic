@@ -122,3 +122,12 @@
  .exam-hybrid .patient-reaction-line{font-size:13px;line-height:1.4}
  .exam-hybrid .patient-reaction-mood{margin-bottom:5px}
 }
+
+/* v3.6.4 floating patient reaction: visible while examining without scrolling */
+.exam-reaction-float{position:fixed;z-index:1200;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100vw - 28px));max-height:min(240px,40vh);transform:translate(-50%,20px);opacity:0;visibility:hidden;pointer-events:none;box-shadow:0 18px 55px rgba(0,0,0,.65);backdrop-filter:blur(16px);transition:opacity .25s,transform .25s,visibility .25s;align-items:center;padding:16px 42px 16px 16px}
+.exam-reaction-float.patient-reaction-visible{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
+.exam-reaction-float.patient-reaction-pop{animation:none}
+.exam-reaction-float .patient-reaction-avatar-3d{flex:0 0 140px;width:140px;height:145px}
+.exam-reaction-close{position:absolute;right:9px;top:7px;border:0;background:transparent;color:#e5dfd2;font-size:28px;line-height:1;cursor:pointer;padding:5px 9px}
+@media(max-width:600px){.exam-reaction-float{bottom:calc(78px + env(safe-area-inset-bottom,0px));padding:12px 34px 12px 10px;gap:11px;min-height:140px}.exam-reaction-float .patient-reaction-avatar-3d{flex:0 0 112px;width:112px;height:128px}.exam-reaction-float .patient-reaction-line{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.exam-reaction-float{transition:none}}
