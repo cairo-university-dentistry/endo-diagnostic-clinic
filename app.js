@@ -9,7 +9,7 @@ const K="endoV02";let s=JSON.parse(localStorage.getItem(K)||'null')||{page:"land
    <h1 class="cinema-title">Every tooth<br>tells a <em>story.</em></h1>
    <p class="cinema-desc">Step inside the operatory. Meet your patient, investigate the symptoms, examine real dental anatomy, and build a diagnosis from evidence.</p>
    <div class="cinema-actions">
-    <button class="cinema-start" onclick="go('clinic')"><span class="cinema-start-icon">▶</span><span><strong>Enter the Clinic</strong><small>BEGIN THE EXPERIENCE</small></span><span class="cinema-arrow">↗</span></button>
+    <button class="cinema-start" onclick="go('patients')"><span class="cinema-start-icon">▶</span><span><strong>Enter the Clinic</strong><small>BEGIN THE EXPERIENCE</small></span><span class="cinema-arrow">↗</span></button>
     <button class="cinema-explore" onclick="gold(false)">Explore the science <span>↗</span></button><button class="cinema-explore" onclick="go('patients')">Select Patient <span>↗</span></button>
    </div>
    <div class="cinema-footnote"><span>01 / PATIENT HISTORY</span><i></i><span>02 / CLINICAL EXAM</span><i></i><span>03 / DIAGNOSIS</span></div>
@@ -51,6 +51,7 @@ function submitDiagnosis(){
  const relevant=(s.find||[]).filter(x=>x.includes("FDI 26 ·"));
  const uniqueTests=new Set(relevant.map(x=>x.split(" · ")[0]));
  const score=Math.min(100,(pCorrect?45:0)+(aCorrect?25:0)+Math.min(20,uniqueTests.size*4)+Math.min(10,(s.asked||[]).length*2));
+ localStorage.setItem("endoCompletedPatient01","yes");
  const feedback=document.querySelector("#diagnosis-feedback");
  if(feedback)feedback.innerHTML=`<div class="diagnosis-result"><div class="eye">CLINICAL REASONING SCORE</div><h2>${score} / 100</h2><p>45 points: pulpal diagnosis · 25: apical assessment · 20: distinct tests on FDI 26 · 10: history questions.</p><h3>${pCorrect&&aCorrect?"Excellent clinical reasoning!":"Review the evidence"}</h3><p><strong>Pulpal diagnosis:</strong> ${pCorrect?"Correct.":"Review needed."} The fictional case supports symptomatic irreversible pulpitis: deep caries and lingering cold pain indicate an inflamed pulp unlikely to recover. A positive EPT response alone does not establish pulpal health.</p><p><strong>Apical assessment:</strong> ${aCorrect?"Correct.":"Review needed."} Negative percussion and palpation are reassuring, but without radiographic and complete examination data the apical diagnosis cannot be confirmed.</p><p><strong>Teaching note:</strong> This is an illustrative scenario, not a diagnosis of a real patient.</p><div class="exam-session-actions"><button class="btn primary" onclick="restartPatient()">↻ Replay Patient 01 from Start</button><button class="btn" onclick="go('patients')">Choose Patient</button></div></div>`;
  const submit=document.querySelector("#diagnosis-submit");if(submit)submit.disabled=true;
@@ -66,8 +67,14 @@ function restartPatient(){
  save();render();window.scrollTo(0,0);
 }
 function patientSelector(){
- const cases=Array.from({length:9},(_,i)=>'<button class="btn" disabled>Patient '+String(i+2).padStart(2,"0")+' · Coming soon</button>').join("");
- shell(`<main class="screen"><section class="panel"><div class="eye">ENDO · PATIENT CASES</div><h1>Select a Patient</h1><p class="lead">Select a case directly. New patients will unlock when their clinical content is ready.</p><div class="case-picker"><button class="btn primary" onclick="go('clinic')">Patient 01 · Continue →</button>${cases}</div><div class="exam-session-actions"><button class="btn" onclick="restartPatient()">↻ Restart Patient 01</button><button class="btn" onclick="go('landing')">← Home</button></div></section></main>`);
+ const completed=localStorage.getItem("endoCompletedPatient01")==="yes";
+ const cards=Array.from({length:10},(_,i)=>{
+  const n=i+1,available=n===1,finished=available&&completed;
+  const status=finished?"✓ COMPLETED":available?"● AVAILABLE":"🔒 LOCKED";
+  const sub=finished?"Completed · Replay or continue":available?"Start your first clinical case":"Complete previous stages · Case not yet released";
+  return '<button class="stage-card '+(available?'stage-open':'stage-locked')+'" '+(available?'onclick="go(\'clinic\')"':'disabled aria-disabled="true"')+'><span class="stage-number">STAGE '+String(n).padStart(2,"0")+'</span><strong>Patient '+String(n).padStart(2,"0")+'</strong><span class="stage-status">'+status+'</span><small>'+sub+'</small></button>';
+ }).join("");
+ shell(`<main class="screen stage-selection"><div class="eye">ENDO · CLINICAL JOURNEY</div><h1>Choose Your Stage.</h1><p class="lead">Finish a patient's diagnosis to complete that stage. Future stages unlock in order when their cases are released.</p><div class="stage-grid">${cards}</div><div class="exam-session-actions"><button class="btn" onclick="restartPatient()">↻ Restart Patient 01</button><button class="btn" onclick="go('landing')">← Home</button></div></main>`);
 }
 function render(){({landing,clinic,history,preexam,exam,patients:patientSelector,gold:goldPage}[s.page]||landing)()}render();
 
