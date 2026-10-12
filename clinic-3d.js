@@ -139,7 +139,7 @@ export async function mountClinic3D(stage,getPosition){
    wrapper.add(model);
    patientFallback.forEach(o=>o.visible=false);
    patient.add(wrapper);
-   import("./patient-animation.js?v=1").then(m=>{if(stage.isConnected)patientAnimator=m.createPatientAnimator(model)});
+   import("./patient-animation.js?v=2").then(m=>{if(stage.isConnected)patientAnimator=m.createPatientAnimator(model)});
    console.info("ENDO: imported rigged patient preview loaded");
   },undefined,()=>console.info("ENDO: using original patient until preview assets are uploaded"));
  }).catch(()=>{});
