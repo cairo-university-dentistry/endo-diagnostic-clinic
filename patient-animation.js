@@ -17,16 +17,16 @@ export function createPatientAnimator(model){
   armRest[k]=delta.multiply(base[k].clone());
  }
  let phase=0;
- function pose({walking=false,seated=false,pain=false,talking=false,dt=.016}={}){
+ function pose({walking=false,seated=false,pain=false,severe=false,talking=false,dt=.016}={}){
   phase+=Math.min(.06,dt)*(walking?8:talking?2.2:1);
   const stride=walking?Math.sin(phase):0;
   const movement={
-   leftarm:[walking?stride*.22:0,0,0],rightarm:[walking?-stride*.22:0,0,0],
+   leftarm:[walking?stride*.22:severe?-.24:pain?-.09:0,0,severe?-.13:0],rightarm:[walking?-stride*.22:severe?-.24:pain?-.09:0,0,severe?.13:0],
    leftforearm:[-.14,0,0],rightforearm:[-.14,0,0],
    leftupleg:[seated?-1.1:stride*.44,0,0],rightupleg:[seated?-1.1:-stride*.44,0,0],
    leftleg:[seated?1.05:Math.max(0,-stride)*.4,0,0],rightleg:[seated?1.05:Math.max(0,stride)*.4,0,0],
-   spine1:[seated?-.12:0,0,0],spine2:[pain?-.12:seated?-.07:0,0,0],
-   neck:[pain?-.08:0,0,0],head:[pain?-.1:talking?Math.sin(phase*2)*.035:0,Math.sin(phase*.35)*.025,pain?.05:0]
+   spine1:[severe?-.16:seated?-.12:0,0,severe?Math.sin(phase*2)*.035:0],spine2:[severe?-.22:pain?-.09:seated?-.07:0,0,0],
+   neck:[severe?-.14:pain?-.05:0,0,0],head:[severe?-.2:pain?-.065:talking?Math.sin(phase*2)*.035:0,Math.sin(phase*.35)*.025,severe?.12:pain?.035:0]
   };
   for(const [k,b] of Object.entries(bones)){
    const target=(armRest[k]||base[k]).clone();
