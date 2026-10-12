@@ -87,7 +87,7 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  const key=new T.DirectionalLight(0xffe5cf,2.3);key.position.set(-3,5,5);scene.add(key);
  const rim=new T.DirectionalLight(0xa5c7d8,1.3);rim.position.set(3,2,-3);scene.add(rim);
  const avatar=gltf.scene;scene.add(avatar);avatar.updateMatrixWorld(true);
- let patientAnimator=null;import("./patient-animation.js?v=1").then(m=>{if(stage.isConnected)patientAnimator=m.createPatientAnimator(avatar)});
+ let patientAnimator=null;import("./patient-animation.js?v=2").then(m=>{if(stage.isConnected)patientAnimator=m.createPatientAnimator(avatar)});
  // Hide disconnected arms in the temporary half-body model.
  const initial=new T.Box3().setFromObject(avatar),origin=initial.getCenter(new T.Vector3()),span=initial.getSize(new T.Vector3());
  avatar.traverse(part=>{
@@ -98,7 +98,7 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  const box=new T.Box3().setFromObject(avatar),center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());
  // Portrait crop: focus on upper torso, not full-body bounds.
  const focusY=box.max.y-size.y*.13;
- const portraitHeight=Math.max(size.y*.33,size.x*.45);
+ const portraitHeight=size.y*.31;
  const dist=portraitHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.2;
  camera.position.set(center.x,focusY,center.z+dist);
  camera.lookAt(center.x,focusY,center.z);
