@@ -33,8 +33,8 @@ const K="endoV02";let s=JSON.parse(localStorage.getItem(K)||'null')||{page:"land
   </div>
  </div>
  <div class="cinema-bottom"><span>DESIGNED FOR CLINICAL THINKING</span><span>EXPLORE · EXAMINE · DECIDE</span><span>SCROLL TO BEGIN <b>↓</b></span></div>
- </main>`)} function clinicArt(){return `<div class="clinicwrap"><div class="clinic"><div class="room lock"><span class="lab">RADIOLOGY · LOCKED</span></div><div class="room rec"><span class="lab">RECEPTION</span></div><div class="room op"><span class="lab">OPERATORY 01</span></div><div class="chair"></div><div class="dot doc"></div><div class="dot pat"></div></div></div>`}function clinic(){shell(`<main class="screen"><div class="eye">DAY 01 · PATIENT 01</div><h1>Your first patient<br>has arrived.</h1><p class="lead">Reception: “Doctor, your first patient has arrived.”</p>${clinicArt()}<button class="btn primary" onclick="go('history')">Talk to Patient →</button></main>`)}const legacyQ=[["nature","What does the pain feel like?","It can feel sharp, doctor — especially when something sets it off."],["location","Can you point to where it hurts?","It's hard to point to one exact spot."],["trigger","What brings the pain on?","Cold seems to trigger it."],["duration","How long does it last after cold?","It doesn't disappear immediately. It lingers."],["relief","Does anything relieve the pain?","I usually wait for it to settle down."]];const activeCase=()=>getCase(s.patientId||1)||getCase(1);
-const q=activeCase().history;
+ </main>`)} function clinicArt(){return `<div class="clinicwrap"><div class="clinic"><div class="room lock"><span class="lab">RADIOLOGY · LOCKED</span></div><div class="room rec"><span class="lab">RECEPTION</span></div><div class="room op"><span class="lab">OPERATORY 01</span></div><div class="chair"></div><div class="dot doc"></div><div class="dot pat"></div></div></div>`}function clinic(){shell(`<main class="screen"><div class="eye">DAY 01 · ${caseLabel().toUpperCase()}</div><h1>Your next patient<br>has arrived.</h1><p class="lead">Reception: “Doctor, your first patient has arrived.”</p>${clinicArt()}<button class="btn primary" onclick="go('history')">Talk to Patient →</button></main>`)}const legacyQ=[["nature","What does the pain feel like?","It can feel sharp, doctor — especially when something sets it off."],["location","Can you point to where it hurts?","It's hard to point to one exact spot."],["trigger","What brings the pain on?","Cold seems to trigger it."],["duration","How long does it last after cold?","It doesn't disappear immediately. It lingers."],["relief","Does anything relieve the pain?","I usually wait for it to settle down."]];const activeCase=()=>getCase(s.patientId||1)||getCase(1);
+let q=activeCase().history;
 function caseLabel(){return activeCase().label}
 function caseCode(){return activeCase().code}
 function caseTooth(){return activeCase().target}
@@ -85,9 +85,9 @@ function gold(from=true){s.from=from;s.ret=s.page=="gold"?s.ret:s.page;s.page="g
 function restartPatient(){
  if(!confirm("Restart the current patient? This clears the current history, examination records and diagnosis progress."))return;
  s={page:"clinic",patientId:activeCase().id,asked:[],find:[],tool:null,ret:"clinic",from:false,walkX:37,walkY:82};
- save();render();window.scrollTo(0,0);
+ q=activeCase().history;save();render();window.scrollTo(0,0);
 }
-function startPatient(id){if(!releasedCaseIds.includes(id))return;s={page:"clinic",patientId:id,asked:[],find:[],tool:null,ret:"clinic",from:false,walkX:37,walkY:82};save();render();window.scrollTo(0,0)}
+function startPatient(id){if(!releasedCaseIds.includes(id))return;q=getCase(id).history;s={page:"clinic",patientId:id,asked:[],find:[],tool:null,ret:"clinic",from:false,walkX:37,walkY:82};save();render();window.scrollTo(0,0)}
 function patientSelector(){
  const completed=localStorage.getItem(completionKey(1))==="yes";
  const cards=Array.from({length:10},(_,i)=>{
