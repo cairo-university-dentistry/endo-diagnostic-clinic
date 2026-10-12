@@ -1,5 +1,4 @@
-/* v1.3 — University of Dundee Permanent Dentition (CC BY 4.0).
-   Tooth numbering is a preliminary left/right geometric mapping pending clinical QA. */
+/* v1.4 — Anatomical mesh-level tooth isolation and FDI mapping (CC BY 4.0). */
 let activeDispose=null;
 let activeInstrument=null;
 export function performInstrument(tool,fdi){if(activeInstrument)activeInstrument(tool,fdi)}
@@ -84,7 +83,7 @@ export async function mountExam3D(host,onSelect){
  function tap(e){
   const rect=renderer.domElement.getBoundingClientRect();
   const pointer=new T.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
-  // Use tooth-center screen proximity to disambiguate overlapping central incisors.
+  // Each selectable object is now exactly one tooth mesh.
   const visible=teeth.filter(t=>t.parent.visible);
   const candidates=visible.map(t=>{
    t.updateWorldMatrix(true,true);
@@ -100,7 +99,7 @@ export async function mountExam3D(host,onSelect){
   // For closely spaced incisors the front-most ray hit can belong to the
   // neighboring tooth. Choose the nearest projected anatomical tooth center.
   const nearest=candidates[0];
-  const chosen=nearest&&nearest.distance<Math.max(32,rect.width*.055)?nearest.tooth:hitTooth;
+  const chosen=hitTooth||((nearest&&nearest.distance<18)?nearest.tooth:null);
   if(chosen)pick(chosen);
  }
  function setArch(mode){arches.upper.visible=mode!=="lower";arches.lower.visible=mode!=="upper";if(selected&&!selected.parent.visible)clearPick()}
@@ -135,14 +134,24 @@ export async function mountExam3D(host,onSelect){
   const maxilla=gltf.scene.getObjectByName("group2");
   if(!mandible||!maxilla)throw Error("Anatomy groups not found");
   // Each immediate child represents one tooth, potentially with multiple mesh parts.
-  const groups=[{source:mandible,target:arches.lower,arch:"lower",expected:16},{source:maxilla,target:arches.upper,arch:"upper",expected:14}];
+  const groups=[{source:mandible,target:arches.lower,arch:"lower",expected:16},{source:maxilla,target:arches.upper,arch:"upper",expected:16}];
   const worldBox=new T.Box3().setFromObject(gltf.scene);
   const center=worldBox.getCenter(new T.Vector3());const size=worldBox.getSize(new T.Vector3());
   const scale=5.8/Math.max(size.x,size.y,size.z);
   gltf.scene.updateMatrixWorld(true);
   for(const g of groups){
-   const units=g.source.children.slice().filter(n=>{let found=false;n.traverse(o=>{if(o.isMesh)found=true});return found});
-   if(units.length!==g.expected)throw Error("Unexpected tooth count: "+g.arch+" "+units.length);
+   // The original upper group contains BOTH central incisors in one parent.
+   // Split by actual anatomical mesh, never by immediate GLTF parent.
+   const units=[];
+   g.source.traverse(node=>{
+    if(!node.isMesh||!node.geometry?.attributes?.position)return;
+    const box=new T.Box3().setFromObject(node);
+    const span=box.getSize(new T.Vector3());
+    // Ignore tiny seam artifacts (one upper mesh is only ~0.01 units).
+    if(Math.max(span.x,span.y,span.z)<.045)return;
+    units.push(node);
+   });
+   if(units.length!==g.expected)throw Error("Unexpected individual tooth meshes: "+g.arch+" "+units.length);
    const indexed=units.map(n=>{const b=new T.Box3().setFromObject(n);return {node:n,x:b.getCenter(new T.Vector3()).x}});
    indexed.sort((a,b)=>b.x-a.x);
    const half=indexed.length/2;
@@ -151,7 +160,7 @@ export async function mountExam3D(host,onSelect){
     const tooth=new T.Group();
     // Bake the original model hierarchy transforms into a tooth-local scene.
     node.updateWorldMatrix(true,true);
-    const cloned=node.clone(true);
+    const cloned=node.clone(false);
     cloned.matrix.copy(node.matrixWorld);cloned.matrix.decompose(cloned.position,cloned.quaternion,cloned.scale);
     tooth.add(cloned);
     tooth.position.copy(center).multiplyScalar(-scale);
@@ -206,7 +215,7 @@ export async function mountExam3D(host,onSelect){
    });
   }
   const ids=teeth.map(t=>t.userData.fdi);
-  const expectedIds=[11,12,13,14,15,16,17,21,22,23,24,25,26,27,31,32,33,34,35,36,37,38,41,42,43,44,45,46,47,48];
+  const expectedIds=[11,12,13,14,15,16,17,18,21,22,23,24,25,26,27,28,31,32,33,34,35,36,37,38,41,42,43,44,45,46,47,48];
   if(ids.length!==expectedIds.length||new Set(ids).size!==expectedIds.length||expectedIds.some(id=>!ids.includes(id)))throw Error("FDI validation failed");
   status.textContent="University of Dundee · CC BY 4.0 · Anatomical training model";
  }catch(err){console.error("Anatomical model load failed",err);status.textContent="Unable to load anatomical model. Please reload."; }
