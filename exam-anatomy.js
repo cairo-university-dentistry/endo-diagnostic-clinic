@@ -146,6 +146,7 @@ export async function mountExam3D(host,onSelect){
    const indexed=units.map(n=>{const b=new T.Box3().setFromObject(n);return {node:n,x:b.getCenter(new T.Vector3()).x}});
    indexed.sort((a,b)=>b.x-a.x);
    const half=indexed.length/2;
+   if(half!==Math.floor(half))throw Error("Invalid tooth grouping");
    indexed.forEach(({node},i)=>{
     const tooth=new T.Group();
     // Bake the original model hierarchy transforms into a tooth-local scene.
@@ -204,6 +205,9 @@ export async function mountExam3D(host,onSelect){
     }
    });
   }
+  const ids=teeth.map(t=>t.userData.fdi);
+  const expectedIds=[11,12,13,14,15,16,17,21,22,23,24,25,26,27,31,32,33,34,35,36,37,38,41,42,43,44,45,46,47,48];
+  if(ids.length!==expectedIds.length||new Set(ids).size!==expectedIds.length||expectedIds.some(id=>!ids.includes(id)))throw Error("FDI validation failed");
   status.textContent="University of Dundee · CC BY 4.0 · Anatomical training model";
  }catch(err){console.error("Anatomical model load failed",err);status.textContent="Unable to load anatomical model. Please reload."; }
  return dispose;
