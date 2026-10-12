@@ -120,6 +120,7 @@ export async function mountClinic3D(stage,getPosition){
  // Optional imported patient asset: retain procedural patient if the files are not uploaded yet.
  // Rig and materials are preserved; movement is controlled by the existing patient group.
  const patientFallback=[...patient.children];
+ let patientAnimator=null;
  import("https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js").then(({GLTFLoader})=>{
   if(!stage.isConnected)return;
   new GLTFLoader().load("./assets/patient/scene.gltf",gltf=>{
@@ -138,6 +139,7 @@ export async function mountClinic3D(stage,getPosition){
    wrapper.add(model);
    patientFallback.forEach(o=>o.visible=false);
    patient.add(wrapper);
+   import("./patient-animation.js?v=1").then(m=>{if(stage.isConnected)patientAnimator=m.createPatientAnimator(model)});
    console.info("ENDO: imported rigged patient preview loaded");
   },undefined,()=>console.info("ENDO: using original patient until preview assets are uploaded"));
  }).catch(()=>{});
@@ -199,6 +201,8 @@ export async function mountClinic3D(stage,getPosition){
  function size(){if(disposed)return;const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);const aspect=w/h;camera.left=-7.4*aspect;camera.right=7.4*aspect;camera.top=7.4;camera.bottom=-7.4;camera.updateProjectionMatrix()}
  const ro=new ResizeObserver(size);ro.observe(stage);size();
  function frame(t){if(disposed)return;if(!stage.isConnected||document.querySelector(".walk-stage")!==stage){dispose();return}
+ const delta=Math.min(.06,(t-(last||t))/1000);last=t;
+ patientAnimator?.pose({walking:!!patientJourney,seated:!patientJourney&&s.patientSeated,pain:false,dt:delta});
  const p=getPosition();if(p){const tx=(p.x/100-.5)*12.2,tz=(p.y/100-.5)*8.2;doctor.position.x+=(tx-doctor.position.x)*.25;doctor.position.z+=(tz-doctor.position.z)*.25;if(Math.abs(tx-doctor.position.x)+Math.abs(tz-doctor.position.z)>.04)doctor.rotation.y=Math.atan2(tx-doctor.position.x,tz-doctor.position.z)}
  if(patientJourney){
  const elapsed=performance.now()-patientJourney.start;
