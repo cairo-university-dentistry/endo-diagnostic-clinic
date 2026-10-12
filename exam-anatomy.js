@@ -81,7 +81,28 @@ export async function mountExam3D(host,onSelect){
  };
  function clearPick(){selected=null;teeth.forEach(t=>t.traverse(o=>{if(o.isMesh&&o.userData.baseMaterial)o.material=o.userData.baseMaterial}));onSelect?.(null,null)}
  function pick(t){clearPick();selected=t;t.traverse(o=>{if(o.isMesh){o.material=o.userData.baseMaterial.clone();o.material.color.set(0xffd18b);o.material.emissive?.set(0x49300e)}});onSelect?.(t.userData.fdi,t.userData.arch)}
- function tap(e){const b=renderer.domElement.getBoundingClientRect();const p=new T.Vector2((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);const ray=new T.Raycaster();ray.setFromCamera(p,camera);const hit=ray.intersectObjects(teeth.filter(t=>t.parent.visible),true)[0];if(hit){let o=hit.object;while(o&&!teeth.includes(o))o=o.parent;if(o)pick(o)}}
+ function tap(e){
+  const rect=renderer.domElement.getBoundingClientRect();
+  const pointer=new T.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
+  // Use tooth-center screen proximity to disambiguate overlapping central incisors.
+  const visible=teeth.filter(t=>t.parent.visible);
+  const candidates=visible.map(t=>{
+   t.updateWorldMatrix(true,true);
+   const box=new T.Box3().setFromObject(t);
+   const projected=box.getCenter(new T.Vector3()).project(camera);
+   const dx=(projected.x-pointer.x)*rect.width*.5,dy=(projected.y-pointer.y)*rect.height*.5;
+   return {tooth:t,distance:Math.hypot(dx,dy)};
+  }).sort((a,b)=>a.distance-b.distance);
+  const ray=new T.Raycaster();ray.setFromCamera(pointer,camera);
+  const hit=ray.intersectObjects(visible,true)[0];
+  let hitTooth=null;
+  if(hit){let node=hit.object;while(node&&!visible.includes(node))node=node.parent;if(node)hitTooth=node}
+  // For closely spaced incisors the front-most ray hit can belong to the
+  // neighboring tooth. Choose the nearest projected anatomical tooth center.
+  const nearest=candidates[0];
+  const chosen=nearest&&nearest.distance<Math.max(32,rect.width*.055)?nearest.tooth:hitTooth;
+  if(chosen)pick(chosen);
+ }
  function setArch(mode){arches.upper.visible=mode!=="lower";arches.lower.visible=mode!=="upper";if(selected&&!selected.parent.visible)clearPick()}
  const controls=host.parentElement.querySelectorAll("[data-arch]");
  controls.forEach(b=>b.addEventListener("click",()=>{controls.forEach(x=>x.classList.toggle("active",x===b));setArch(b.dataset.arch)}));
