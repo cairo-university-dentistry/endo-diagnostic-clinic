@@ -119,7 +119,7 @@ function patientReaction(fdi,tool){
  const response=activeCase().responses[tool]||"I'm ready, doctor.";
  const strong=/ouch|ah!|intense|keeps hurting|painful|continues after|keeps going/i.test(response);
  const mild=/sharp|sensitive|tender|hurts/i.test(response);
- return {mood:strong?"In pain":mild?"Concerned":"Calm",line:response.replace(/^(Patient|Doctor):\\s*/i,"")};
+ return {mood:strong?"In pain":mild?"Concerned":"Calm",line:response.replace(/^(Patient|Doctor):\s*/i,"")};
 }
 function updateExamFace(mood){import("./patient-face-3d.js?v=reaction-4").then(m=>m.updatePatientFace(document.querySelector("#exam-patient-avatar"),mood==="In pain"?"severePain":mood==="Concerned"?"pain":"neutral"))}
 let reactionDismissTimer;
