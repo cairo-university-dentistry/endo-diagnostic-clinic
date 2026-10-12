@@ -139,7 +139,7 @@ export async function mountExam3D(host,onSelect){
     tooth.userData={fdi:quadrant*10+number,arch:g.arch};
     tooth.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.baseMaterial=o.material}});
     g.target.add(tooth);teeth.push(tooth);
-    if(tooth.userData.fdi===26){
+    if(tooth.userData.fdi===Number(window.ENDO_ACTIVE_CASE_TOOTH||26)){
       // Non-destructive per-vertex staining of the existing anatomical surface.
       tooth.updateMatrixWorld(true);
       const bounds=new T.Box3().setFromObject(tooth);
