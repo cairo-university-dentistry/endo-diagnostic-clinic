@@ -87,6 +87,7 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  const key=new T.DirectionalLight(0xffe5cf,2.3);key.position.set(-3,5,5);scene.add(key);
  const rim=new T.DirectionalLight(0xa5c7d8,1.3);rim.position.set(3,2,-3);scene.add(rim);
  const avatar=gltf.scene;scene.add(avatar);avatar.updateMatrixWorld(true);
+ const reactionGlow=new T.PointLight(0xff745f,0,5);reactionGlow.position.set(0,2,2);scene.add(reactionGlow);
  let patientAnimator=null;import("./patient-animation.js?v=2").then(m=>{if(stage.isConnected)patientAnimator=m.createPatientAnimator(avatar)});
  // Hide disconnected arms in the temporary half-body model.
  const initial=new T.Box3().setFromObject(avatar),origin=initial.getCenter(new T.Vector3()),span=initial.getSize(new T.Vector3());
@@ -121,7 +122,9 @@ async function mountRiggedPortrait(stage,T,gltf,expression){
  function frame(t){
    if(disposed)return;if(!stage.isConnected){dispose();return}
    const seconds=(t-start)/1000;
-   patientAnimator?.pose({walking:false,seated:false,pain:expression==="pain",talking:!reduce&&seconds<3,dt:.016});
+   const discomfort=expression==="pain"?1:["concerned","uncertain"].includes(expression)?.35:0;
+   reactionGlow.intensity+=(discomfort*.9-reactionGlow.intensity)*.08;
+   patientAnimator?.pose({walking:false,seated:false,pain:["pain","concerned","uncertain"].includes(expression),talking:!reduce&&seconds<3,dt:.016});
    const blink=!reduce&&(seconds%4.9<.12),talk=!reduce&&seconds<2.8?Math.abs(Math.sin(seconds*10))*.35:0;
    for(const mesh of meshes){
      for(const [name,index] of Object.entries(mesh.morphTargetDictionary)){
